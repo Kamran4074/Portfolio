@@ -47,13 +47,24 @@ export default function Projects() {
                   {p.tags.map((t) => <span key={t}>{t}</span>)}
                 </div>
                 <div className="project-links">
-                  <a href={p.demo} className="btn btn-sm" target="_blank" rel="noreferrer">
-                    Live Demo
-                  </a>
+                  {p.demo && (
+                    <a href={p.demo} className="btn btn-sm" target="_blank" rel="noreferrer">
+                      Live Demo
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
           ))}
+          <a
+            href="https://github.com/Kamran4074?tab=repositories"
+            target="_blank"
+            rel="noreferrer"
+            className="project-card project-more"
+          >
+            <span className="project-more-plus">+</span>
+            <p>View More on GitHub</p>
+          </a>
         </div>
       </div>
     </section>
