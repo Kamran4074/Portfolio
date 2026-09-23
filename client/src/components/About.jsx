@@ -1,43 +1,34 @@
-import profilePic from "../assets/passport photo2.jpeg";
+import localPhoto from "../assets/passport photo2.jpeg";
+import SectionHead from "./SectionHead";
 
-export default function About() {
+export default function About({ profile }) {
   return (
     <section className="section" id="about">
       <div className="container">
-        <h2 className="section-title">About Me</h2>
+        <SectionHead index={1} label="about" title="About me" />
         <div className="about-grid">
-          <div className="about-avatar">
-            <div className="avatar-glow" />
-            <div className="avatar-ring">
-              <img src={profilePic} alt="Kamran Alam" className="avatar-img" />
-            </div>
-          </div>
+          <img src={profile.photoUrl || localPhoto} alt={profile.name} className="avatar" loading="lazy" />
           <div className="about-text">
-            <p>
-              I'm a <strong>MERN Stack Developer</strong> currently pursuing B.Tech in Computer
-              Science at <strong>Galgotias University</strong> (CGPA: 7.8). I build
-              production-ready full-stack applications with a strong focus on security,
-              performance, and clean architecture.
-            </p>
-            <p>
-              Proficient in <strong>REST API development</strong>,{" "}
-              <strong>JWT-based authentication</strong>, real-time systems with{" "}
-              <strong>Socket.IO</strong>, and security-aware coding practices including bcrypt
-              password hashing and input validation.
-            </p>
-            <div className="about-stats">
-              <div className="stat"><span>195+</span><p>DSA Problems</p></div>
-              <div className="stat">
-                <a href="https://github.com/Kamran4074" target="_blank" rel="noreferrer" style={{ textDecoration: "none" }}>
-                  <span style={{ cursor: "pointer" }}>7+</span>
-                </a>
-                <p>
-                  <a href="https://github.com/Kamran4074" target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>
-                    Projects on GitHub ↗
-                  </a>
-                </p>
+            {profile.about?.map((p, i) => <p key={i}>{p}</p>)}
+            {profile.focus?.length > 0 && (
+              <div className="chips focus">
+                {profile.focus.map((f) => <span className="chip" key={f}>{f}</span>)}
               </div>
-              <div className="stat"><span>4</span><p>Certifications</p></div>
+            )}
+            <div className="stats">
+              {profile.stats?.map((s) => {
+                const body = (
+                  <>
+                    <div className="stat-value">{s.value}</div>
+                    <div className="stat-label">{s.label}</div>
+                  </>
+                );
+                return s.url ? (
+                  <a key={s.label} href={s.url} className="stat" target="_blank" rel="noreferrer">{body}</a>
+                ) : (
+                  <div key={s.label} className="stat">{body}</div>
+                );
+              })}
             </div>
           </div>
         </div>

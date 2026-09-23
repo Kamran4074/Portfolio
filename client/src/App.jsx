@@ -1,24 +1,50 @@
+import { lazy, Suspense } from "react";
+import useContent from "./hooks/useContent";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import About from "./components/About";
-import Skills from "./components/Skills";
+import Experience from "./components/Experience";
 import Projects from "./components/Projects";
+import Skills from "./components/Skills";
 import Certifications from "./components/Certifications";
 import Contact from "./components/Contact";
 
-export default function App() {
+// The admin panel is only downloaded when someone visits /admin.
+const Admin = lazy(() => import("./admin/Admin"));
+
+function Portfolio() {
+  const { profile, experience, projects, skills, certifications, achievements } = useContent();
+  const github = profile.socials?.find((s) => /github/i.test(s.label))?.url;
+
   return (
     <>
-      <Navbar />
-      <Hero />
-      <About />
-      <Skills />
-      <Projects />
-      <Certifications />
-      <Contact />
+      <Navbar name={profile.name} />
+      <main>
+        <Hero profile={profile} skills={skills} />
+        <About profile={profile} />
+        {experience.length > 0 && <Experience items={experience} />}
+        <Projects items={projects} github={github} />
+        <Skills items={skills} />
+        {(certifications.length > 0 || achievements.length > 0) && (
+          <Certifications certifications={certifications} achievements={achievements} />
+        )}
+        <Contact profile={profile} />
+      </main>
       <footer className="footer">
-        <p>Designed & Built by <strong>Kamran Alam</strong> · 2025</p>
+        <span>© {new Date().getFullYear()} {profile.name}</span>
+        <span className="mono">React · Node.js · Express · MongoDB</span>
       </footer>
     </>
   );
+}
+
+export default function App() {
+  if (window.location.pathname.startsWith("/admin")) {
+    return (
+      <Suspense fallback={<p style={{ padding: 40 }}>Loading admin…</p>}>
+        <Admin />
+      </Suspense>
+    );
+  }
+  return <Portfolio />;
 }

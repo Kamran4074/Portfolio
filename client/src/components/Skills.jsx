@@ -1,24 +1,16 @@
-const skills = [
-  { icon: "🖥", title: "Frontend", tags: ["React.js", "HTML5", "CSS3", "Tailwind CSS", "Recharts"] },
-  { icon: "⚙️", title: "Backend", tags: ["Node.js", "Express.js", "REST API", "Socket.IO"] },
-  { icon: "🗄", title: "Database", tags: ["MongoDB", "MongoDB Atlas", "Mongoose"] },
-  { icon: "🔐", title: "Security", tags: ["JWT", "bcrypt", "HTTP-only Cookies", "express-validator"] },
-  { icon: "🛠", title: "Tools", tags: ["Git", "GitHub", "Postman", "VS Code", "Axios", "npm"] },
-  { icon: "💡", title: "Languages", tags: ["JavaScript", "Java"] },
-];
+import SectionHead from "./SectionHead";
 
-export default function Skills() {
+export default function Skills({ items }) {
   return (
-    <section className="section section-dark" id="skills">
+    <section className="section section-alt" id="skills">
       <div className="container">
-        <h2 className="section-title">Technical Skills</h2>
+        <SectionHead index={4} label="skills" title="Technical skills" />
         <div className="skills-grid">
-          {skills.map((s) => (
-            <div className="skill-card" key={s.title}>
-              <div className="skill-icon">{s.icon}</div>
-              <h3>{s.title}</h3>
-              <div className="tags">
-                {s.tags.map((t) => <span key={t}>{t}</span>)}
+          {items.map((g) => (
+            <div className="skill-group" key={g._id || g.title}>
+              <h3>{g.title.toLowerCase()}</h3>
+              <div className="chips">
+                {g.items?.map((t) => <span className="chip" key={t}>{t}</span>)}
               </div>
             </div>
           ))}

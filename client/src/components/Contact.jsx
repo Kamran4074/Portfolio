@@ -1,79 +1,73 @@
 import { useState } from "react";
-import axios from "axios";
+import api, { errorMessage } from "../api";
+import Icon, { iconFor } from "./Icon";
+import SectionHead from "./SectionHead";
 
-const contactLinks = [
-  { icon: "✉️", label: "kamran.alam.work@gmail.com", href: "mailto:kamran.alam.work@gmail.com" },
-  { icon: "📞", label: "+91 7301730616", href: "tel:+917301730616" },
-  { icon: "💼", label: "LinkedIn", href: "https://www.linkedin.com/in/kamran-alam-73017kam/" },
-  { icon: "🐙", label: "GitHub", href: "https://github.com/Kamran4074" },
-];
+const empty = { name: "", email: "", message: "" };
 
-export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState(null); // "success" | "error" | null
+export default function Contact({ profile }) {
+  const [form, setForm] = useState(empty);
+  const [status, setStatus] = useState(null); // { ok: boolean, text: string }
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus(null);
     try {
-      await axios.post("/api/contact", form);
-      setStatus("success");
-      setForm({ name: "", email: "", message: "" });
-    } catch {
-      setStatus("error");
+      await api.post("/contact", form);
+      setStatus({ ok: true, text: "Message sent. I'll get back to you soon." });
+      setForm(empty);
+    } catch (err) {
+      const text = err?.response?.status === 429 ? "Too many messages. Please try again later." : errorMessage(err);
+      setStatus({ ok: false, text });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="section" id="contact">
-      <div className="container">
-        <h2 className="section-title">Get In Touch</h2>
-        <p className="contact-sub">Open to opportunities, collaborations, or just a good tech chat.</p>
-
-        <div className="contact-cards">
-          {contactLinks.map((c) => (
-            <a key={c.label} href={c.href} target="_blank" rel="noreferrer" className="contact-card">
-              <span>{c.icon}</span>
-              <p>{c.label}</p>
-            </a>
-          ))}
+    <section className="section section-alt" id="contact">
+      <div className="container contact-grid">
+        <div>
+          <SectionHead index={6} label="contact" title="Let's talk" sub="Open to backend and full stack roles, freelance work, or a good conversation about APIs." />
+          <div className="contact-lines">
+            {profile.email && (
+              <a className="contact-line" href={`mailto:${profile.email}`}><Icon name="mail" /> {profile.email}</a>
+            )}
+            {profile.phone && (
+              <a className="contact-line" href={`tel:${profile.phone.replace(/\s/g, "")}`}><Icon name="phone" /> {profile.phone}</a>
+            )}
+            {profile.location && (
+              <div className="contact-line"><Icon name="pin" /> {profile.location}</div>
+            )}
+            {profile.socials?.slice(0, 2).map((s) => (
+              <a key={s.label} className="contact-line" href={s.url} target="_blank" rel="noreferrer">
+                <Icon name={iconFor(s.label)} /> {s.label}
+              </a>
+            ))}
+          </div>
         </div>
 
-        <form className="contact-form" onSubmit={handleSubmit}>
-          <h3>Send a Message</h3>
-          <div className="form-group">
-            <label>Name</label>
-            <input
-              name="name" type="text" placeholder="Your name"
-              value={form.name} onChange={handleChange} required
-            />
+        <form className="form" onSubmit={handleSubmit}>
+          <div className="field">
+            <label htmlFor="c-name">Name</label>
+            <input id="c-name" name="name" value={form.name} onChange={handleChange} required maxLength={80} />
           </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              name="email" type="email" placeholder="your@email.com"
-              value={form.email} onChange={handleChange} required
-            />
+          <div className="field">
+            <label htmlFor="c-email">Email</label>
+            <input id="c-email" name="email" type="email" value={form.email} onChange={handleChange} required />
           </div>
-          <div className="form-group">
-            <label>Message</label>
-            <textarea
-              name="message" rows={5} placeholder="What's on your mind?"
-              value={form.message} onChange={handleChange} required
-            />
+          <div className="field">
+            <label htmlFor="c-msg">Message</label>
+            <textarea id="c-msg" name="message" rows={5} value={form.message} onChange={handleChange} required minLength={5} maxLength={3000} />
           </div>
           <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            {loading ? "Sending..." : "Send Message →"}
+            {loading ? "Sending…" : "Send message"}
           </button>
-          {status === "success" && <p className="form-success">Message sent successfully! 🎉</p>}
-          {status === "error" && <p className="form-error">Something went wrong. Try again.</p>}
+          {status && <p className={`form-msg ${status.ok ? "ok" : "err"}`}>{status.text}</p>}
         </form>
       </div>
     </section>

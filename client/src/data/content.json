@@ -1,0 +1,132 @@
+{
+  "profile": {
+    "name": "Kamran Alam",
+    "title": "Full Stack Developer · Backend Focused",
+    "tagline": "I build secure, well-structured REST APIs and the React apps that use them. Node.js, Express, MySQL and PostgreSQL in production.",
+    "location": "Ghaziabad, Uttar Pradesh, India",
+    "email": "kamran.alam.work@gmail.com",
+    "phone": "+91 7301730616",
+    "resumeUrl": "",
+    "photoUrl": "",
+    "available": true,
+    "about": [
+      "I'm a Full Stack Developer at Viva Organization, where I joined as an intern and was promoted to a full-time role. I own the backend and frontend of three production applications: Clinic Management, GST Billing and School Management.",
+      "My day-to-day is backend work: designing REST APIs, JWT authentication and role-based access control, relational schemas in MySQL and PostgreSQL, and query tuning. On one set of endpoints, that tuning cut average response time by 30%.",
+      "I graduated with a B.Tech in Computer Science from Galgotias University (CGPA 7.93) and have solved 350+ DSA problems across LeetCode and GeeksforGeeks."
+    ],
+    "focus": ["REST API design", "JWT + RBAC", "SQL query optimization", "Relational data modeling"],
+    "socials": [
+      { "label": "GitHub", "url": "https://github.com/Kamran4074" },
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/kamran-alam-73017kam/" },
+      { "label": "LeetCode", "url": "https://leetcode.com/u/Kammykamran/" },
+      { "label": "GeeksforGeeks", "url": "https://www.geeksforgeeks.org/user/kammykamran49fy/" }
+    ],
+    "stats": [
+      { "value": "3", "label": "Production apps", "url": "" },
+      { "value": "30%", "label": "Faster API responses", "url": "" },
+      { "value": "10+", "label": "REST APIs shipped", "url": "" },
+      { "value": "350+", "label": "DSA problems", "url": "https://leetcode.com/u/Kammykamran/" }
+    ]
+  },
+  "experience": [
+    {
+      "company": "Viva Organization",
+      "role": "Full Stack Developer",
+      "location": "Ghaziabad, Uttar Pradesh",
+      "start": "Jul 2026",
+      "end": "Present",
+      "points": [
+        "Promoted to full-time after the internship; own end-to-end delivery of backend and frontend modules across 3 production applications (Clinic Management, GST Billing, School Management).",
+        "Implemented JWT authentication and role-based access control (RBAC) middleware across 4+ user roles.",
+        "Optimized MySQL and PostgreSQL queries, reducing average API response time by 30%.",
+        "Deploy and maintain the applications on VPS servers with cPanel; write Jest unit tests for core API logic and debug production issues in an Agile/Scrum team."
+      ],
+      "tech": ["Node.js", "Express.js", "React.js", "MySQL", "PostgreSQL", "Sequelize", "Jest", "VPS"],
+      "order": 0
+    },
+    {
+      "company": "Viva Organization",
+      "role": "Full Stack Developer Intern",
+      "location": "Ghaziabad, Uttar Pradesh",
+      "start": "Apr 2026",
+      "end": "Jun 2026",
+      "points": [
+        "Developed backend and frontend modules for the Clinic Management, GST Billing and School Management systems.",
+        "Designed, built and integrated 10+ REST APIs for appointments, billing, GST invoicing, authentication, student registration and fee management, cutting manual billing and invoicing effort by 40%."
+      ],
+      "tech": ["Node.js", "Express.js", "React.js", "MySQL", "PostgreSQL", "Sequelize"],
+      "order": 1
+    }
+  ],
+  "projects": [
+    {
+      "title": "Enterprise School Management System",
+      "subtitle": "Multi-role school ERP",
+      "description": "A production-oriented school management system with a secure backend: academic structure, student registration, fee collection, attendance and reporting.",
+      "highlights": [
+        "JWT authentication with RBAC across 3 roles (admin, teacher, staff)",
+        "Normalized MySQL schema for academic years, classes, sections and 500+ student records",
+        "8+ REST APIs for onboarding, fees, attendance and academic workflows, with referential integrity enforced in the database",
+        "Dashboards for fee status and academic performance across 10+ classes and sections"
+      ],
+      "tech": ["React.js", "Node.js", "Express.js", "MySQL"],
+      "demoUrl": "",
+      "githubUrl": "",
+      "featured": true,
+      "order": 0
+    },
+    {
+      "title": "SmartExpense",
+      "subtitle": "Personal finance tracker",
+      "description": "A full-stack expense tracker with secure authentication and analytics dashboards for income, expenses and monthly trends.",
+      "highlights": [
+        "JWT authentication with bcrypt password hashing",
+        "6+ modular REST APIs for income, expenses, categories and reports",
+        "Interactive Recharts dashboards for monthly and per-category trends"
+      ],
+      "tech": ["MongoDB", "Express.js", "React.js", "Node.js", "JWT", "Recharts"],
+      "demoUrl": "https://expense-tracker-alpha-fawn.vercel.app/",
+      "githubUrl": "",
+      "featured": true,
+      "order": 1
+    },
+    {
+      "title": "ChatWave",
+      "subtitle": "Real-time secure chat",
+      "description": "Real-time chat over Socket.IO with JWT authentication stored in HTTP-only cookies.",
+      "highlights": ["Bidirectional messaging with Socket.IO", "HTTP-only cookie sessions to keep tokens out of JavaScript"],
+      "tech": ["MERN", "Socket.IO", "JWT"],
+      "demoUrl": "https://chatwave-azure.vercel.app/",
+      "githubUrl": "",
+      "featured": false,
+      "order": 2
+    },
+    {
+      "title": "Task Manager",
+      "subtitle": "Task management app",
+      "description": "Full CRUD task manager with priority and status filtering and server-side validation.",
+      "highlights": ["Request validation with express-validator", "Filtering across 3 priorities and 4 status states"],
+      "tech": ["MERN", "Tailwind CSS", "JWT"],
+      "demoUrl": "https://task-manager-two-theta-87.vercel.app",
+      "githubUrl": "",
+      "featured": false,
+      "order": 3
+    }
+  ],
+  "skills": [
+    { "title": "Backend", "items": ["Node.js", "Express.js", "REST API Design", "JWT", "RBAC", "Middleware", "Zod", "Winston", "Morgan"], "order": 0 },
+    { "title": "Databases", "items": ["MySQL", "PostgreSQL", "MongoDB", "Sequelize", "Prisma", "Mongoose", "SQLite"], "order": 1 },
+    { "title": "Frontend", "items": ["React.js", "HTML5", "CSS3", "Tailwind CSS"], "order": 2 },
+    { "title": "Languages", "items": ["Java", "JavaScript", "SQL"], "order": 3 },
+    { "title": "Testing & Deployment", "items": ["Jest", "VPS Hosting", "cPanel"], "order": 4 },
+    { "title": "Tools & Practices", "items": ["Git", "GitHub", "GitLab", "VS Code", "Agile/Scrum", "DSA", "OOP", "DBMS"], "order": 5 }
+  ],
+  "certifications": [
+    { "title": "Cyber Job Simulation", "issuer": "Deloitte", "url": "https://drive.google.com/file/d/1GDppkzxOAHniEEHk-temiTOmzZgTT-0r/view?usp=drive_link", "order": 0 },
+    { "title": "Software Engineering", "issuer": "NPTEL", "url": "https://drive.google.com/file/d/17Ul4EOhXWimSdlNMuf1F3I-ystakzd2l/view?usp=drive_link", "order": 1 }
+  ],
+  "achievements": [
+    { "text": "Solved 150+ problems on LeetCode and 200+ on GeeksforGeeks (350+ total).", "order": 0 },
+    { "text": "Volunteered to teach computer skills, mathematics and English to underprivileged students.", "order": 1 }
+  ]
+}

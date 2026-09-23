@@ -1,29 +1,65 @@
-export default function Hero() {
+import Icon, { iconFor } from "./Icon";
+
+const K = ({ children }) => <span className="t-key">"{children}"</span>;
+const S = ({ children }) => <span className="t-str">"{children}"</span>;
+
+// A fake API response built from real profile data: the "backend engineer" hook.
+function Terminal({ profile, skills }) {
+  const stack = (skills.find((s) => /backend/i.test(s.title))?.items || []).slice(0, 4);
+  const dbs = (skills.find((s) => /database/i.test(s.title))?.items || []).slice(0, 3);
+  const arr = (items) =>
+    items.map((v, i) => (
+      <span key={v}><S>{v}</S>{i < items.length - 1 ? ", " : ""}</span>
+    ));
+
   return (
-    <section className="hero" id="hero">
-      <div className="hero-blob" />
-      <div style={{ position: "relative", zIndex: 1 }}>
-        <div className="hero-badge">
-          <span className="hero-badge-dot" />
-          Available for opportunities
+    <div className="terminal" aria-label="Profile as an API response">
+      <div className="terminal-bar"><i /><i /><i /><span>bash</span></div>
+      <pre>
+        <span className="t-prompt">$</span> curl -s api.{profile.name.split(" ")[0].toLowerCase()}.dev/v1/me{"\n"}
+        <span className="t-muted">HTTP/1.1 </span><span className="t-ok">200 OK</span><span className="t-muted">  · application/json</span>{"\n\n"}
+        {"{\n"}
+        {"  "}<K>name</K>: <S>{profile.name}</S>,{"\n"}
+        {"  "}<K>role</K>: <S>{profile.title.split("·")[0].trim()}</S>,{"\n"}
+        {"  "}<K>location</K>: <S>{profile.location?.split(",")[0]}</S>,{"\n"}
+        {"  "}<K>stack</K>: [{arr(stack)}],{"\n"}
+        {"  "}<K>databases</K>: [{arr(dbs)}],{"\n"}
+        {"  "}<K>openToWork</K>: <span className="t-bool">{String(!!profile.available)}</span>{"\n"}
+        {"}"}
+      </pre>
+    </div>
+  );
+}
+
+export default function Hero({ profile, skills }) {
+  return (
+    <section className="hero" id="top">
+      <div className="container hero-grid">
+        <div>
+          {profile.available && (
+            <div className="status-pill"><span className="status-dot" />open to backend / full stack roles</div>
+          )}
+          <h1 className="hero-name">{profile.name}</h1>
+          <p className="hero-title">{profile.title}</p>
+          <p className="hero-sub">{profile.tagline}</p>
+          <div className="hero-btns">
+            <a href="#projects" className="btn btn-primary">View my work</a>
+            {profile.resumeUrl && (
+              <a href={profile.resumeUrl} className="btn btn-outline" target="_blank" rel="noreferrer">
+                <Icon name="file" /> Resume
+              </a>
+            )}
+            <a href="#contact" className="btn btn-outline">Contact</a>
+          </div>
+          <div className="socials">
+            {profile.socials?.map((s) => (
+              <a key={s.label} href={s.url} className="social" target="_blank" rel="noreferrer">
+                <Icon name={iconFor(s.label)} size={14} /> {s.label}
+              </a>
+            ))}
+          </div>
         </div>
-        <p className="hero-greeting">Hi there, I'm</p>
-        <h1 className="hero-name">Kamran Alam</h1>
-        <h2 className="hero-title">MERN Stack Developer</h2>
-        <p className="hero-sub">
-          Building full-stack web apps with MongoDB, Express, React &amp; Node.js
-        </p>
-        <div className="hero-btns">
-          <a href="#projects" className="btn btn-primary">View Projects</a>
-          <a href="#contact" className="btn btn-outline">Contact Me</a>
-        </div>
-        <div className="hero-socials">
-          <a href="mailto:kamran.alam.work@gmail.com" title="Email">✉</a>
-          <a href="https://www.linkedin.com/in/kamran-alam-73017kam/" target="_blank" rel="noreferrer" title="LinkedIn">in</a>
-          <a href="https://github.com/Kamran4074" target="_blank" rel="noreferrer" title="GitHub">GH</a>
-          <a href="https://leetcode.com/u/Kammykamran/" target="_blank" rel="noreferrer" title="LeetCode">LC</a>
-          <a href="https://www.geeksforgeeks.org/user/kammykamran49fy/" target="_blank" rel="noreferrer" title="GeeksforGeeks">GFG</a>
-        </div>
+        <Terminal profile={profile} skills={skills} />
       </div>
     </section>
   );
