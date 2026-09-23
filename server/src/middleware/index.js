@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { ZodError } = require("zod");
+const { Setting } = require("../models");
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -20,18 +21,22 @@ const validate = (schema) => (req, _res, next) => {
   }
 };
 
-const requireAuth = (req, _res, next) => {
+const requireAuth = asyncHandler(async (req, _res, next) => {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;
-  if (!token) return next(new HttpError(401, "Authentication required"));
+  if (!token) throw new HttpError(401, "Authentication required");
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
-    if (req.user.role !== "admin") throw new Error("forbidden");
-    next();
   } catch {
-    next(new HttpError(401, "Invalid or expired token"));
+    throw new HttpError(401, "Invalid or expired token");
   }
-};
+  if (req.user.role !== "admin") throw new HttpError(401, "Invalid or expired token");
+
+  // Tokens issued before the last password change are rejected.
+  const setting = await Setting.findOne().select("tokenVersion").lean();
+  if ((setting?.tokenVersion ?? 0) !== (req.user.tv ?? 0)) throw new HttpError(401, "Session expired, please log in again");
+  next();
+});
 
 const notFound = (req, _res, next) => next(new HttpError(404, `Route not found: ${req.method} ${req.originalUrl}`));
 

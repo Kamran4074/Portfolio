@@ -9,7 +9,7 @@ import Skills from "./components/Skills";
 import Certifications from "./components/Certifications";
 import Contact from "./components/Contact";
 
-// The admin panel is only downloaded when someone visits /admin.
+// The settings page is only downloaded when someone visits /settings (or /admin).
 const Admin = lazy(() => import("./admin/Admin"));
 
 function Portfolio() {
@@ -39,9 +39,9 @@ function Portfolio() {
 }
 
 export default function App() {
-  if (window.location.pathname.startsWith("/admin")) {
+  if (/^\/(settings|admin)(\/|$)/.test(window.location.pathname)) {
     return (
-      <Suspense fallback={<p style={{ padding: 40 }}>Loading admin…</p>}>
+      <Suspense fallback={<p style={{ padding: 40 }}>Loading settings…</p>}>
         <Admin />
       </Suspense>
     );

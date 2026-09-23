@@ -2,5 +2,11 @@
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "rewrites": [{ "source": "/admin(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/settings(.*)", "destination": "/index.html" },
+    { "source": "/admin(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    { "source": "/(settings|admin)(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
+  ]
 }

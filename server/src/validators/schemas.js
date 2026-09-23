@@ -58,6 +58,11 @@ const message = z.object({
   message: str(3000).min(5),
 });
 
-const login = z.object({ email: z.string().trim().email(), password: z.string().min(1).max(200) });
+const login = z.object({ password: z.string().min(1).max(200) });
 
-module.exports = { profile, experience, project, skillGroup, certification, achievement, message, login };
+const changePassword = z.object({
+  currentPassword: z.string().min(1).max(200),
+  newPassword: z.string().min(10, "Use at least 10 characters").max(200),
+});
+
+module.exports = { profile, experience, project, skillGroup, certification, achievement, message, login, changePassword };

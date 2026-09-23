@@ -114,4 +114,17 @@ const Message = mongoose.model(
   "contacts" // keep the existing collection so old messages are not lost
 );
 
-module.exports = { Profile, Experience, Project, SkillGroup, Certification, Achievement, Message };
+// Singleton document holding the settings-page password (bcrypt hash).
+// tokenVersion is bumped on password change so older login tokens stop working.
+const Setting = mongoose.model(
+  "Setting",
+  new Schema(
+    {
+      passwordHash: { type: String, required: true },
+      tokenVersion: { type: Number, default: 0 },
+    },
+    opts
+  )
+);
+
+module.exports = { Setting, Profile, Experience, Project, SkillGroup, Certification, Achievement, Message };
