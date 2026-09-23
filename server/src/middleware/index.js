@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { ZodError } = require("zod");
 const { Setting } = require("../models");
+const logger = require("../utils/logger");
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -51,7 +52,7 @@ const errorHandler = (err, req, res, _next) => {
   if (err.name === "CastError") return res.status(400).json({ error: "Invalid id" });
 
   const status = err.status || 500;
-  if (status >= 500) console.error(`[${req.method} ${req.originalUrl}]`, err);
+  if (status >= 500) logger.error(`${req.method} ${req.originalUrl} failed`, { error: err.message, stack: err.stack });
   res.status(status).json({ error: status >= 500 ? "Internal server error" : err.message });
 };
 

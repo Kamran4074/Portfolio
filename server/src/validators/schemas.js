@@ -14,6 +14,7 @@ const profile = z.object({
   location: optStr(120),
   email: z.union([z.literal(""), z.string().trim().email()]).optional().default(""),
   phone: optStr(30),
+  whatsapp: optStr(30),
   resumeUrl: url,
   photoUrl: url,
   available: z.boolean().optional().default(true),

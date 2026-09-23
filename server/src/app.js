@@ -1,11 +1,11 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-const mongoose = require("mongoose");
 const crudRouter = require("./routes/crud");
 const schemas = require("./validators/schemas");
 const { Experience, Project, SkillGroup, Certification, Achievement } = require("./models");
 const { notFound, errorHandler } = require("./middleware");
+const requestLogger = require("./middleware/requestLogger");
 
 const app = express();
 
@@ -13,14 +13,12 @@ const app = express();
 const origins = (process.env.CLIENT_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean);
 
 app.set("trust proxy", 1); // needed for correct IPs in rate limiting behind Render/Railway/Nginx
+app.use(requestLogger);
 app.use(helmet());
 app.use(cors(origins.length ? { origin: origins } : {}));
 app.use(express.json({ limit: "100kb" }));
 
-app.get("/api/health", (_req, res) => {
-  const db = mongoose.connection.readyState === 1 ? "up" : "down";
-  res.status(db === "up" ? 200 : 503).json({ status: db === "up" ? "ok" : "degraded", db, uptime: Math.round(process.uptime()) });
-});
+app.use("/api/health", require("./routes/health"));
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api", require("./routes/content"));

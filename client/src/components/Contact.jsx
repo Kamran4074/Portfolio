@@ -5,6 +5,14 @@ import SectionHead from "./SectionHead";
 
 const empty = { name: "", email: "", message: "" };
 
+// wa.me needs digits only, with country code (10-digit numbers are assumed Indian).
+const whatsappLink = (number, name = "") => {
+  let digits = number.replace(/\D/g, "");
+  if (digits.length === 10) digits = `91${digits}`;
+  const text = encodeURIComponent(`Hi ${name.split(" ")[0] || "there"}, I came across your portfolio and would like to connect.`);
+  return `https://wa.me/${digits}?text=${text}`;
+};
+
 export default function Contact({ profile }) {
   const [form, setForm] = useState(empty);
   const [status, setStatus] = useState(null); // { ok: boolean, text: string }
@@ -39,6 +47,11 @@ export default function Contact({ profile }) {
             )}
             {profile.phone && (
               <a className="contact-line" href={`tel:${profile.phone.replace(/\s/g, "")}`}><Icon name="phone" /> {profile.phone}</a>
+            )}
+            {profile.whatsapp && (
+              <a className="contact-line contact-whatsapp" href={whatsappLink(profile.whatsapp, profile.name)} target="_blank" rel="noreferrer">
+                <Icon name="whatsapp" /> WhatsApp: {profile.whatsapp}
+              </a>
             )}
             {profile.location && (
               <div className="contact-line"><Icon name="pin" /> {profile.location}</div>

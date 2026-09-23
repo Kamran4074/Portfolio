@@ -22,7 +22,12 @@ api.interceptors.request.use((config) => {
 export const errorMessage = (err) => {
   const data = err?.response?.data;
   if (data?.details?.length) return data.details.map((d) => `${d.field || "body"}: ${d.message}`).join("\n");
-  return data?.error || err?.message || "Request failed";
+  if (typeof data?.error === "string") return data.error;
+  // Anything else (HTML page, host error object like Vercel's {code, message}) means the API was not reached.
+  if (!err?.response || typeof data !== "object" || data?.error) {
+    return `Cannot reach the API server${err?.response ? ` (HTTP ${err.response.status})` : ""}. Is the backend running and VITE_API_URL set?`;
+  }
+  return err?.message || "Request failed";
 };
 
 export default api;

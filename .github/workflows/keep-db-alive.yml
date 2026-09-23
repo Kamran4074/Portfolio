@@ -1,0 +1,46 @@
+# Keeps the MongoDB Atlas cluster active by calling GET /api/health/db,
+# which does a real write + read on the database.
+#
+# Setup (GitHub repo → Settings → Secrets and variables → Actions → New repository secret):
+#   BACKEND_URL      e.g. https://kamran-portfolio-api.onrender.com   (no trailing slash)
+#   KEEPALIVE_TOKEN  optional, must match KEEPALIVE_TOKEN on the server if you set one there
+#
+# Runs on the 1st and 21st of every month (max gap ~20 days), and can be run by hand
+# from the Actions tab ("Run workflow").
+name: Keep DB alive
+
+on:
+  schedule:
+    - cron: "0 3 1,21 * *" # 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Ping /api/health/db
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+          KEEPALIVE_TOKEN: ${{ secrets.KEEPALIVE_TOKEN }}
+        run: |
+          if [ -z "$BACKEND_URL" ]; then
+            echo "::error::BACKEND_URL secret is not set"
+            exit 1
+          fi
+          # Free hosts (Render etc.) can take ~1 min to wake up, so retry a few times.
+          for attempt in 1 2 3 4 5; do
+            echo "Attempt $attempt"
+            if curl --fail-with-body -sS --max-time 90 \
+                 -H "x-keepalive-token: $KEEPALIVE_TOKEN" \
+                 -H "user-agent: github-actions-keepalive" \
+                 "$BACKEND_URL/api/health/db"; then
+              echo
+              echo "Database is alive."
+              exit 0
+            fi
+            echo
+            sleep 30
+          done
+          echo "::error::Keep-alive ping failed after 5 attempts"
+          exit 1

@@ -5,6 +5,7 @@ const schemas = require("../validators/schemas");
 const escapeHtml = require("../utils/escapeHtml");
 const { Message } = require("../models");
 const { asyncHandler, validate, requireAuth, HttpError } = require("../middleware");
+const logger = require("../utils/logger");
 
 const router = express.Router();
 
@@ -25,11 +26,12 @@ router.post(
     await Message.create({ name, email, message });
 
     // The message is already stored, so a mail failure should not fail the request.
+    // Awaited because serverless hosts (Vercel) freeze the function after responding.
     const safe = { name: escapeHtml(name), email: escapeHtml(email), message: escapeHtml(message).replace(/\n/g, "<br/>") };
-    transporter
+    await transporter
       .sendMail({
         from: `"Portfolio Contact" <${process.env.GMAIL_USER}>`,
-        to: process.env.GMAIL_USER,
+        to: process.env.CONTACT_TO || process.env.GMAIL_USER,
         replyTo: email,
         subject: `New message from ${name.replace(/[\r\n]/g, " ")} (Portfolio)`,
         html: `
@@ -43,7 +45,8 @@ router.post(
             </div>
           </div>`,
       })
-      .catch((err) => console.error("Mail error:", err.message));
+      .then(() => logger.info("Contact mail sent", { from: email }))
+      .catch((err) => logger.error("Contact mail failed", { error: err.message, from: email }));
 
     res.status(201).json({ success: true });
   })

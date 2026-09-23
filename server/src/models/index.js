@@ -17,6 +17,7 @@ const Profile = mongoose.model(
       location: String,
       email: String,
       phone: String,
+      whatsapp: String,
       resumeUrl: String,
       photoUrl: String,
       available: { type: Boolean, default: true },
@@ -127,4 +128,10 @@ const Setting = mongoose.model(
   )
 );
 
-module.exports = { Setting, Profile, Experience, Project, SkillGroup, Certification, Achievement, Message };
+// Single document updated by GET /api/health/db so Atlas always sees recent activity.
+const Heartbeat = mongoose.model(
+  "Heartbeat",
+  new Schema({ _id: String, lastPing: Date, count: { type: Number, default: 0 }, source: String }, { versionKey: false })
+);
+
+module.exports = { Heartbeat, Setting, Profile, Experience, Project, SkillGroup, Certification, Achievement, Message };
