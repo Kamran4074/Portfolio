@@ -18,6 +18,10 @@ app.use(helmet());
 app.use(cors(origins.length ? { origin: origins } : {}));
 app.use(express.json({ limit: "100kb" }));
 
+// Friendly response for anyone opening the API root in a browser.
+app.get(["/", "/api"], (_req, res) => res.json({ name: "Kamran Alam portfolio API", status: "ok", health: "/api/health/db" }));
+app.get(["/favicon.ico", "/favicon.png"], (_req, res) => res.status(204).end());
+
 app.use("/api/health", require("./routes/health"));
 
 app.use("/api/auth", require("./routes/auth"));
