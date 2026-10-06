@@ -1,4 +1,12 @@
 import SectionHead from "./SectionHead";
+import { apiUrl } from "../api";
+
+export const DEFAULT_PHOTO = "/images/kamran-alam-480.jpg";
+
+// Which photo to show, in order: uploaded in /settings, a pasted photo URL, the bundled one.
+// The uploaded photo's URL carries its version, so browsers re-fetch only after a new upload.
+export const photoSrc = (profile) =>
+  profile.photoVersion ? apiUrl(`/profile/photo?v=${profile.photoVersion}`) : profile.photoUrl || null;
 
 // "350+" -> { value: 350, prefix: "", suffix: "+" }. Non-numeric stats are shown as-is.
 export const parseStat = (text = "") => {
@@ -23,19 +31,20 @@ function Stat({ s }) {
 }
 
 export default function About({ index, profile }) {
+  const custom = photoSrc(profile);
   return (
     <section className="section" id="about" aria-labelledby="about-title">
       <div className="container">
         <SectionHead id="about" index={index} label="about" title="About me" />
         <div className="about-grid">
           <div className="avatar-wrap" data-reveal>
-            {profile.photoUrl ? (
-              <img src={profile.photoUrl} alt={`Portrait of ${profile.name}`} className="avatar" width="220" height="220" loading="lazy" decoding="async" />
+            {custom ? (
+              <img src={custom} alt={`Portrait of ${profile.name}`} className="avatar" width="220" height="220" loading="lazy" decoding="async" />
             ) : (
               <picture>
                 <source srcSet="/images/kamran-alam-480.avif" type="image/avif" />
                 <source srcSet="/images/kamran-alam-480.webp" type="image/webp" />
-                <img src="/images/kamran-alam-480.jpg" alt={`Portrait of ${profile.name}`} className="avatar" width="220" height="220" loading="lazy" decoding="async" />
+                <img src={DEFAULT_PHOTO} alt={`Portrait of ${profile.name}`} className="avatar" width="220" height="220" loading="lazy" decoding="async" />
               </picture>
             )}
             <span className="avatar-frame" aria-hidden="true" />

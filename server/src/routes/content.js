@@ -19,7 +19,9 @@ router.get(
       sorted(Certification),
       sorted(Achievement),
     ]);
-    res.set("Cache-Control", "public, max-age=60");
+    // no-cache = revalidate every time; Express ETags make unchanged responses a cheap 304.
+    // Edits from /settings (including a new photo) then show up on the next page load.
+    res.set("Cache-Control", "no-cache");
     res.json({ profile, experience, education, projects, skills, certifications, achievements });
   })
 );

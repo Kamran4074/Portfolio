@@ -3,6 +3,7 @@ import api, { errorMessage, getToken, setToken } from "../api";
 import { collections, profileConfig } from "./config";
 import Form from "./Form";
 import PasswordInput from "./PasswordInput";
+import PhotoEditor from "./PhotoEditor";
 import "./admin.css";
 
 function Login({ onLogin }) {
@@ -108,7 +109,12 @@ function ProfileEditor({ notify }) {
   };
 
   if (!doc) return <p className="muted">Loading…</p>;
-  return <Form key={doc.updatedAt || "new"} fields={profileConfig.fields} doc={doc} onSave={save} saving={saving} />;
+  return (
+    <>
+      <PhotoEditor profile={doc} onChange={(patch) => setDoc((d) => ({ ...d, ...patch }))} notify={notify} />
+      <Form key={doc.updatedAt || "new"} fields={profileConfig.fields} doc={doc} onSave={save} saving={saving} />
+    </>
+  );
 }
 
 function CollectionEditor({ config, notify }) {

@@ -20,6 +20,8 @@ const Profile = mongoose.model(
       whatsapp: String,
       resumeUrl: String,
       photoUrl: String,
+      // Set by POST /api/profile/photo (short content hash). Not editable through PUT /profile.
+      photoVersion: String,
       available: { type: Boolean, default: true },
       about: [String],
       socials: [linkSchema],
@@ -148,10 +150,26 @@ const Setting = mongoose.model(
   )
 );
 
+// Binary files uploaded from /settings (currently just the profile photo, ~20-40 KB WebP).
+// Stored in MongoDB because the API runs on Vercel, which has no persistent disk.
+const Asset = mongoose.model(
+  "Asset",
+  new Schema(
+    {
+      _id: String, // e.g. "profile-photo"
+      data: { type: Buffer, required: true },
+      contentType: { type: String, required: true },
+      size: Number,
+      hash: String,
+    },
+    { timestamps: true, versionKey: false }
+  )
+);
+
 // Single document updated by GET /api/health/db so Atlas always sees recent activity.
 const Heartbeat = mongoose.model(
   "Heartbeat",
   new Schema({ _id: String, lastPing: Date, count: { type: Number, default: 0 }, source: String }, { versionKey: false })
 );
 
-module.exports = { Heartbeat, Setting, Profile, Experience, Education, Project, SkillGroup, Certification, Achievement, Message };
+module.exports = { Asset, Heartbeat, Setting, Profile, Experience, Education, Project, SkillGroup, Certification, Achievement, Message };

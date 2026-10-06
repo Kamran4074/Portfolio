@@ -2,7 +2,11 @@ import axios from "axios";
 
 // In dev, Vite proxies /api to localhost:5000. In production set VITE_API_URL
 // to the deployed backend, e.g. https://kamran-portfolio-api.onrender.com
-const api = axios.create({ baseURL: `${import.meta.env.VITE_API_URL || ""}/api`, timeout: 15000 });
+const API_BASE = `${import.meta.env.VITE_API_URL || ""}/api`;
+const api = axios.create({ baseURL: API_BASE, timeout: 15000 });
+
+// Full URL for things the browser loads directly, like <img src>.
+export const apiUrl = (path) => `${API_BASE}${path}`;
 
 const TOKEN_KEY = "admin_token";
 

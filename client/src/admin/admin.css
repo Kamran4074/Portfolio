@@ -55,3 +55,20 @@
 .password-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
 /* Hide Edge's built-in reveal button so there is only one toggle. */
 .password-wrap input::-ms-reveal, .password-wrap input::-ms-clear { display: none; }
+
+/* Profile photo upload */
+.photo-editor { display: flex; gap: 22px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+.photo-drop {
+  position: relative; flex: none; padding: 6px; border-radius: 18px;
+  border: 1.5px dashed var(--border-strong); transition: border-color 0.2s, background 0.2s;
+}
+.photo-drop.is-dragging { border-color: var(--accent); background: var(--accent-soft); }
+.photo-drop img { width: 140px; height: 140px; border-radius: 12px; object-fit: cover; display: block; background: var(--surface-2); }
+.photo-badge {
+  position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+  padding: 2px 8px; border-radius: 6px; background: var(--amber); color: #1a1205; font: 700 0.7rem var(--mono);
+}
+.photo-body { flex: 1; min-width: 220px; }
+.photo-body h3 { margin-bottom: 4px; font-size: 1rem; }
+.photo-body .muted { font-size: 0.88rem; }
+.photo-body .admin-form-actions { margin-top: 14px; flex-wrap: wrap; }

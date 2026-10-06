@@ -19,7 +19,7 @@ export const profileConfig = {
     { name: "phone", label: "Phone" },
     { name: "whatsapp", label: "WhatsApp number", hint: "With country code, e.g. +91 7301730616. Leave empty to hide the WhatsApp link." },
     { name: "resumeUrl", label: "Resume URL", type: "url", hint: "Google Drive or any public PDF link. Leave empty to hide the button." },
-    { name: "photoUrl", label: "Photo URL", type: "url", hint: "Leave empty to use the bundled photo." },
+    { name: "photoUrl", label: "Photo URL (optional)", type: "url", hint: "Only used when no photo is uploaded above. Leave empty to use the default photo." },
     { name: "available", label: "Open to work", type: "bool" },
     { name: "about", label: "About paragraphs", type: "lines", hint: "One paragraph per line." },
     { name: "focus", label: "Focus areas", type: "tags" },

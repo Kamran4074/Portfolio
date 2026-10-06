@@ -41,6 +41,7 @@ app.get(["/favicon.ico", "/favicon.png"], (_req, res) => res.status(204).end());
 app.use("/api/health", require("./routes/health"));
 
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/profile/photo", require("./routes/photo")); // before the /api/profile routes
 app.use("/api", require("./routes/content"));
 app.use("/api", require("./routes/messages"));
 app.use("/api/experience", crudRouter(Experience, schemas.experience));
