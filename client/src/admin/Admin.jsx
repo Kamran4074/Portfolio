@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import api, { errorMessage, getToken, setToken } from "../api";
 import { collections, profileConfig } from "./config";
 import Form from "./Form";
+import PasswordInput from "./PasswordInput";
 import "./admin.css";
 
 function Login({ onLogin }) {
@@ -31,7 +32,7 @@ function Login({ onLogin }) {
         <h1 className="section-title" style={{ fontSize: "1.5rem", marginBottom: 20 }}>Enter password</h1>
         <div className="field">
           <label htmlFor="l-pass">Password</label>
-          <input id="l-pass" type="password" autoComplete="current-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <PasswordInput id="l-pass" autoComplete="current-password" autoFocus value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
         <button className="btn btn-primary btn-full" disabled={loading}>{loading ? "Checking…" : "Unlock settings"}</button>
         {error && <p className="form-msg err">{error}</p>}
@@ -67,16 +68,16 @@ function PasswordEditor({ notify }) {
     <form className="admin-form" onSubmit={submit}>
       <div className="field">
         <label htmlFor="p-current">Current password</label>
-        <input id="p-current" type="password" autoComplete="current-password" value={values.currentPassword} onChange={set("currentPassword")} required />
+        <PasswordInput id="p-current" autoComplete="current-password" value={values.currentPassword} onChange={set("currentPassword")} required />
       </div>
       <div className="field">
         <label htmlFor="p-new">New password</label>
-        <input id="p-new" type="password" autoComplete="new-password" minLength={10} value={values.newPassword} onChange={set("newPassword")} required />
+        <PasswordInput id="p-new" autoComplete="new-password" minLength={10} value={values.newPassword} onChange={set("newPassword")} required />
         <small className="hint">At least 10 characters.</small>
       </div>
       <div className="field">
         <label htmlFor="p-confirm">Confirm new password</label>
-        <input id="p-confirm" type="password" autoComplete="new-password" minLength={10} value={values.confirm} onChange={set("confirm")} required />
+        <PasswordInput id="p-confirm" autoComplete="new-password" minLength={10} value={values.confirm} onChange={set("confirm")} required />
       </div>
       <div className="admin-form-actions">
         <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Change password"}</button>
