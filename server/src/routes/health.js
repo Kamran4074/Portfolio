@@ -1,8 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const rateLimit = require("express-rate-limit");
 const { Heartbeat } = require("../models");
-const { asyncHandler, HttpError } = require("../middleware");
+const schemas = require("../validators/schemas");
+const { asyncHandler, validate, limiter, reqMeta, HttpError } = require("../middleware");
+const env = require("../config/env");
 const logger = require("../utils/logger");
 
 const router = express.Router();
@@ -20,11 +21,13 @@ router.get("/", (_req, res) => {
 // Vercel Cron instead sends "Authorization: Bearer <CRON_SECRET>", which is also accepted.
 router.get(
   "/db",
-  rateLimit({ windowMs: 60 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false }),
+  limiter("keep-alive", { windowMs: 60 * 60 * 1000, limit: 10 }),
+  validate(schemas.keepAliveQuery, "query"),
   asyncHandler(async (req, res) => {
-    const { KEEPALIVE_TOKEN, CRON_SECRET } = process.env;
+    const { KEEPALIVE_TOKEN, CRON_SECRET } = env;
     const fromCron = CRON_SECRET && req.get("authorization") === `Bearer ${CRON_SECRET}`;
     if (KEEPALIVE_TOKEN && !fromCron && (req.query.token || req.get("x-keepalive-token")) !== KEEPALIVE_TOKEN) {
+      logger.warn("Keep-alive rejected: bad token", reqMeta(req));
       throw new HttpError(401, "Invalid keep-alive token");
     }
 

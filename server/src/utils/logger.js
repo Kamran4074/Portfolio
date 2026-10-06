@@ -21,8 +21,13 @@ const devFormat = format.combine(
 
 const jsonFormat = format.combine(format.timestamp(), format.errors({ stack: true }), format.json());
 
+// An unknown LOG_LEVEL would make winston drop every message (including the config
+// error that explains it), so fall back to the default; config/env.js reports the typo.
+const LEVELS = ["error", "warn", "info", "http", "verbose", "debug", "silly"];
+const level = LEVELS.includes(process.env.LOG_LEVEL) ? process.env.LOG_LEVEL : isProd ? "http" : "debug";
+
 const logger = createLogger({
-  level: process.env.LOG_LEVEL || (isProd ? "http" : "debug"),
+  level,
   format: format.errors({ stack: true }),
   transports: [new transports.Console({ format: isProd ? jsonFormat : devFormat })],
 });

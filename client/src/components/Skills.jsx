@@ -1,17 +1,21 @@
+import Icon, { skillIconFor } from "./Icon";
 import SectionHead from "./SectionHead";
 
-export default function Skills({ items }) {
+export default function Skills({ index, items }) {
   return (
-    <section className="section section-alt" id="skills">
+    <section className="section section-alt" id="skills" aria-labelledby="skills-title">
       <div className="container">
-        <SectionHead index={4} label="skills" title="Technical skills" />
-        <div className="skills-grid">
+        <SectionHead id="skills" index={index} label="skills" title="Technical skills" />
+        <div className="skills-grid" data-stagger>
           {items.map((g) => (
-            <div className="skill-group" key={g._id || g.title}>
-              <h3>{g.title.toLowerCase()}</h3>
-              <div className="chips">
-                {g.items?.map((t) => <span className="chip" key={t}>{t}</span>)}
+            <div className="skill-group" key={g.title} data-glow>
+              <div className="skill-head">
+                <span className="skill-icon" aria-hidden="true"><Icon name={skillIconFor(g.title)} size={18} /></span>
+                <h3>{g.title}</h3>
               </div>
+              <ul className="chips" aria-label={`${g.title} skills`}>
+                {g.items?.map((t) => <li className="chip" key={t}>{t}</li>)}
+              </ul>
             </div>
           ))}
         </div>

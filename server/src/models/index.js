@@ -58,6 +58,8 @@ const Project = mongoose.model(
       tech: [String],
       demoUrl: String,
       githubUrl: String,
+      image: String,
+      imageAlt: String,
       featured: { type: Boolean, default: false },
       order: { type: Number, default: 0, index: true },
     },
@@ -84,6 +86,24 @@ const Certification = mongoose.model(
       title: { type: String, required: true },
       issuer: String,
       url: String,
+      order: { type: Number, default: 0, index: true },
+    },
+    opts
+  )
+);
+
+const Education = mongoose.model(
+  "Education",
+  new Schema(
+    {
+      institution: { type: String, required: true },
+      degree: { type: String, required: true },
+      field: String,
+      location: String,
+      start: String,
+      end: String,
+      grade: String,
+      details: [String],
       order: { type: Number, default: 0, index: true },
     },
     opts
@@ -134,4 +154,4 @@ const Heartbeat = mongoose.model(
   new Schema({ _id: String, lastPing: Date, count: { type: Number, default: 0 }, source: String }, { versionKey: false })
 );
 
-module.exports = { Heartbeat, Setting, Profile, Experience, Project, SkillGroup, Certification, Achievement, Message };
+module.exports = { Heartbeat, Setting, Profile, Experience, Education, Project, SkillGroup, Certification, Achievement, Message };

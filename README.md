@@ -33,10 +33,27 @@ MongoDB Atlas free clusters get paused after long inactivity. On Vercel, the cro
 calls `GET /api/health/db` daily. As a backup, `.github/workflows/keep-db-alive.yml` calls it on the 1st
 and 21st of each month (repo secret `BACKEND_URL`, plus `KEEPALIVE_TOKEN` if set on the server).
 
-## Logging
-Winston (`server/src/utils/logger.js`) + Morgan (`server/src/middleware/requestLogger.js`).
-Colored console in dev, JSON in production (`NODE_ENV=production`). Files go to `server/logs/`
-(`error.log`, `combined.log`, rotated at 5 MB). Tune with `LOG_LEVEL` and `LOG_TO_FILE=false`.
+## Logging and validation
+**Winston** (`server/src/utils/logger.js`) writes everything: colored console in dev, one JSON object per line
+in production (`NODE_ENV=production`), plus `server/logs/error.log` and `combined.log` (rotated at 5 MB, off on Vercel).
+Tune with `LOG_LEVEL` (error, warn, info, http, debug) and `LOG_TO_FILE=false`.
+
+**Morgan** (`server/src/middleware/requestLogger.js`) logs every request through Winston. Each request gets an id,
+returned as the `X-Request-Id` header and attached to its access line and any error it causes. 500 responses include
+it as `requestId`, so a bug report can be matched to the exact log lines. 4xx log as warn, 5xx as error.
+
+What else is logged:
+- Security: failed logins, rejected or expired tokens, rate-limit blocks, blocked CORS origins, bad keep-alive tokens.
+- Audit (`audit:` prefix): every create, update and delete from /settings, logins and password changes.
+- Contact form: message saved, mail sent or failed (by message id, not the sender's details).
+- MongoDB: connect time, drops and reconnects, with a hint for common Atlas errors.
+- Crashes: unhandled promise rejections and uncaught exceptions.
+
+Never logged: passwords, tokens, request bodies or the MongoDB URI.
+
+**Zod** validates:
+- the environment at startup (`server/src/config/env.js`): a bad `.env` stops the server with one line per problem;
+- request bodies, URL ids and query strings (`server/src/validators/schemas.js`, `validate(schema, "body" | "params" | "query")`).
 
 ## API
 | Method | Path | Auth |
@@ -55,3 +72,18 @@ Colored console in dev, JSON in production (`NODE_ENV=production`). Files go to 
 1. Add it to the Mongoose model in `server/src/models/index.js`
 2. Add it to the Zod schema in `server/src/validators/schemas.js`
 3. Add it to the field list in `client/src/admin/config.js` and render it in the component
+
+## Frontend: rendering, SEO and animation
+- **Pre-rendered HTML.** `npm run build` builds the app, renders the portfolio from `client/src/data/content.json`
+  into `dist/index.html` (`scripts/prerender.mjs`), adds JSON-LD, and writes `robots.txt` and `sitemap.xml`.
+  React then hydrates that markup. Live edits from `/settings` still appear after load; re-deploy to refresh
+  the pre-rendered copy and structured data.
+- **Site URL** lives in `client/site.config.mjs` (or `VITE_SITE_URL` in Vercel). It feeds the canonical link,
+  Open Graph/Twitter tags, JSON-LD, robots.txt and sitemap.xml.
+- **Animation is progressive enhancement.** The hero entrance is CSS only. Scroll effects (GSAP + ScrollTrigger)
+  and smooth scrolling (Lenis) are in `client/src/motion/`, loaded after first paint, and skipped entirely for
+  `prefers-reduced-motion`. Pointer effects (custom cursor, magnetic CTA, glow) are desktop-only.
+  Markup hooks are documented at the top of `client/src/motion/index.js` (`data-reveal`, `data-stagger`, ...).
+- **Project screenshots:** set *Screenshot URL* and *Screenshot description* for a project in `/settings`
+  (16:10, ~1200px wide, WebP). Without one, a generated cover is shown.
+- **Social image:** `client/public/og-image.png` (1200×630). Replace it if your title changes.

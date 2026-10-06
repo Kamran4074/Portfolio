@@ -3,20 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kamran Alam | Full Stack Developer (Backend)</title>
-    <meta name="description" content="Kamran Alam: Full Stack Developer focused on backend engineering with Node.js, Express, MySQL and PostgreSQL. REST APIs, JWT, RBAC and query optimization." />
+    <title>Kamran Alam | Full Stack Developer · Node.js &amp; React</title>
+    <meta name="description" content="Kamran Alam is a Full Stack Developer in Ghaziabad, India, building secure REST APIs and React applications with Node.js, Express, MySQL and PostgreSQL." />
+    <meta name="author" content="Kamran Alam" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="__SITE_URL__/" />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="Kamran Alam" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:url" content="__SITE_URL__/" />
     <meta property="og:title" content="Kamran Alam | Full Stack Developer" />
-    <meta property="og:description" content="Backend-focused full stack developer: Node.js, Express, MySQL, PostgreSQL, React." />
-    <meta name="theme-color" content="#0a0e14" />
+    <meta property="og:description" content="Full Stack Developer focused on the backend: REST APIs, JWT and role-based access control, and SQL performance with Node.js, Express, MySQL, PostgreSQL and React." />
+    <meta property="og:image" content="__SITE_URL__/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Kamran Alam, Full Stack Developer: Node.js, Express, React, MySQL and PostgreSQL" />
+    <meta property="profile:first_name" content="Kamran" />
+    <meta property="profile:last_name" content="Alam" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Kamran Alam | Full Stack Developer" />
+    <meta name="twitter:description" content="Full Stack Developer focused on the backend: REST APIs, JWT and RBAC, and SQL performance with Node.js, Express, MySQL, PostgreSQL and React." />
+    <meta name="twitter:image" content="__SITE_URL__/og-image.png" />
+    <meta name="twitter:image:alt" content="Kamran Alam, Full Stack Developer: Node.js, Express, React, MySQL and PostgreSQL" />
+
+    <meta name="theme-color" content="#0a0e14" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Fonts load without blocking the first paint; text shows in the fallback font until then. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" /></noscript>
+
     <script>
-      try { var t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+      // Runs before first paint: apply the theme (no flash), and opt into scroll animations
+      // only when motion is allowed. If the animation code has not started within 4s
+      // (slow network, blocked script), drop the class so no content stays hidden.
+      (function () {
+        var d = document.documentElement, t;
+        try { t = localStorage.getItem("theme"); } catch (e) {}
+        d.dataset.theme = t || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches && !/^\/(settings|admin)(\/|$)/.test(location.pathname)) {
+          d.classList.add("motion");
+          setTimeout(function () { if (!d.classList.contains("motion-ready")) d.classList.remove("motion"); }, 4000);
+        }
+      })();
     </script>
+    <!--app-jsonld-->
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><!--app-html--></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

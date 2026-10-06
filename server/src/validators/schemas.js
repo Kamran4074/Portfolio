@@ -43,7 +43,21 @@ const project = z.object({
   tech: list(40),
   demoUrl: url,
   githubUrl: url,
+  image: url,
+  imageAlt: optStr(160),
   featured: z.boolean().optional().default(false),
+  order,
+});
+
+const education = z.object({
+  institution: str(160).min(1),
+  degree: str(160).min(1),
+  field: optStr(160),
+  location: optStr(120),
+  start: optStr(40),
+  end: optStr(40),
+  grade: optStr(40),
+  details: list(400),
   order,
 });
 
@@ -66,4 +80,10 @@ const changePassword = z.object({
   newPassword: z.string().min(10, "Use at least 10 characters").max(200),
 });
 
-module.exports = { profile, experience, project, skillGroup, certification, achievement, message, login, changePassword };
+// URL parts. Validating ids up front gives a clean 400 instead of a Mongoose CastError.
+const idParam = z.object({ id: z.string().regex(/^[a-f0-9]{24}$/i, "Invalid id") });
+
+// GET /api/health/db?token=... (the token can also come in a header).
+const keepAliveQuery = z.object({ token: z.string().max(200).optional() });
+
+module.exports = { profile, experience, education, project, skillGroup, certification, achievement, message, login, changePassword, idParam, keepAliveQuery };

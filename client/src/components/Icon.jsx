@@ -11,6 +11,14 @@ const paths = {
   sun: "M12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0-5 1 3h-2l1-3Zm0 20-1-3h2l-1 3ZM2 12l3-1v2l-3-1Zm20 0-3 1v-2l3 1ZM4.9 4.9l2.8 1.4-1.4 1.4-1.4-2.8Zm14.2 14.2-2.8-1.4 1.4-1.4 1.4 2.8Zm0-14.2-1.4 2.8-1.4-1.4 2.8-1.4ZM4.9 19.1l1.4-2.8 1.4 1.4-2.8 1.4Z",
   moon: "M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z",
   menu: "M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z",
+  arrow: "M13.2 5.3 19.9 12l-6.7 6.7-1.4-1.4 4.3-4.3H4v-2h12.1l-4.3-4.3 1.4-1.4Z",
+  arrowUp: "M12 4.1 18.7 10.8l-1.4 1.4-4.3-4.3V20h-2V7.9l-4.3 4.3-1.4-1.4L12 4.1Z",
+  server: "M4 3h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm1 2v4h14V5H5Zm-1 8h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1Zm1 2v4h14v-4H5Zm2-9h2v2H7V6Zm0 10h2v2H7v-2Z",
+  database: "M12 2c4.4 0 8 1.6 8 3.5v13c0 1.9-3.6 3.5-8 3.5s-8-1.6-8-3.5v-13C4 3.6 7.6 2 12 2Zm6 12.3c-1.5.8-3.6 1.2-6 1.2s-4.5-.4-6-1.2v4.2c.3.5 2.5 1.5 6 1.5s5.7-1 6-1.5v-4.2Zm0-6.5c-1.5.8-3.6 1.2-6 1.2s-4.5-.4-6-1.2V12c.3.5 2.5 1.5 6 1.5s5.7-1 6-1.5V7.8ZM12 4C8.5 4 6.3 5 6 5.5 6.3 6 8.5 7 12 7s5.7-1 6-1.5C17.7 5 15.5 4 12 4Z",
+  layout: "M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm1 2v3h14V5H5Zm0 5v9h5v-9H5Zm7 0v9h7v-9h-7Z",
+  check: "M9.5 16.2 5.3 12l-1.4 1.4 5.6 5.6L20.1 8.4 18.7 7 9.5 16.2Z",
+  tool: "M21.7 18.6 13.1 10a6 6 0 0 0-7.6-7.6l3.9 3.9-2.8 2.8-3.9-3.9A6 6 0 0 0 10.3 13l8.6 8.6a1 1 0 0 0 1.4 0l1.4-1.4a1 1 0 0 0 0-1.6Z",
+  cap: "M12 3 1 9l11 6 9-4.9V17h2V9L12 3Zm-6 9.8V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.2l-6 3.3-6-3.3Z",
 };
 
 // Guess an icon from a social label so new links added in the admin get one automatically.
@@ -20,6 +28,17 @@ export const iconFor = (label = "") => {
   if (l.includes("linkedin")) return "linkedin";
   if (l.includes("whatsapp")) return "whatsapp";
   if (l.includes("mail")) return "mail";
+  return "code";
+};
+
+// Same idea for skill groups, so a group added in /settings still gets a sensible icon.
+export const skillIconFor = (title = "") => {
+  const t = title.toLowerCase();
+  if (/back|api|server/.test(t)) return "server";
+  if (/data|sql|db/.test(t)) return "database";
+  if (/front|ui|web/.test(t)) return "layout";
+  if (/test|deploy|devops|cloud/.test(t)) return "check";
+  if (/tool|practice/.test(t)) return "tool";
   return "code";
 };
 

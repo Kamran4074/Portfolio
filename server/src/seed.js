@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const bcrypt = require("bcryptjs");
 const logger = require("./utils/logger");
-const { Setting, Profile, Experience, Project, SkillGroup, Certification, Achievement } = require("./models");
+const { Setting, Profile, Experience, Education, Project, SkillGroup, Certification, Achievement } = require("./models");
 
 const CONTENT_PATH = path.resolve(__dirname, "../../client/src/data/content.json");
 
@@ -18,6 +18,7 @@ async function seedContent({ force = false } = {}) {
   const targets = [
     [Profile, [content.profile]],
     [Experience, content.experience],
+    [Education, content.education],
     [Project, content.projects],
     [SkillGroup, content.skills],
     [Certification, content.certifications],
@@ -54,7 +55,7 @@ async function seedPassword(password, { force = false } = {}) {
 
 async function autoSeed() {
   await seedContent();
-  await seedPassword(process.env.ADMIN_PASSWORD);
+  await seedPassword(require("./config/env").ADMIN_PASSWORD);
 }
 
 module.exports = { seedContent, seedPassword, autoSeed };

@@ -1,26 +1,38 @@
 require("dotenv").config();
-const mongoose = require("mongoose");
-const app = require("./src/app");
-const { connectDB } = require("./src/db");
 const logger = require("./src/utils/logger");
+require("./src/utils/processHandlers")();
 
-const PORT = process.env.PORT || 5000;
+// Validates the environment first, so a bad .env stops here with a clear message.
+let env;
+try {
+  env = require("./src/config/env");
+} catch (err) {
+  logger.error(err.message);
+  setTimeout(() => process.exit(1), 200);
+  return;
+}
+
+const app = require("./src/app");
+const { connectDB, disconnectDB } = require("./src/db");
 
 async function start() {
-  if (!process.env.JWT_SECRET) logger.warn("JWT_SECRET is not set: settings login is disabled.");
   await connectDB(); // also auto-seeds empty collections and the initial password
-  const server = app.listen(PORT, () => logger.info(`Server running on port ${PORT}`));
+  const server = app.listen(env.PORT, () =>
+    logger.info(`Server running on port ${env.PORT}`, { env: env.NODE_ENV, node: process.version })
+  );
 
   const shutdown = (signal) => {
     logger.info(`${signal} received, shutting down`);
-    server.close(() => mongoose.disconnect().then(() => process.exit(0)));
+    server.close(() => disconnectDB().then(() => process.exit(0)));
+    // Do not hang forever on open keep-alive connections.
+    setTimeout(() => process.exit(0), 5000).unref();
   };
   process.on("SIGINT", shutdown);
   process.on("SIGTERM", shutdown);
 }
 
 start().catch((err) => {
-  logger.error("Failed to start", { error: err.message, stack: err.stack });
+  logger.error("Failed to start", { error: err.message });
   // Give the file transport a moment to flush before exiting.
   setTimeout(() => process.exit(1), 200);
 });

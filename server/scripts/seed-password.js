@@ -2,20 +2,21 @@
 // Usage: npm run seed-password -- "your-strong-password"
 // Resetting also logs out every open settings session.
 require("dotenv").config();
-const mongoose = require("mongoose");
-const { seedPassword } = require("../src/seed");
+const logger = require("../src/utils/logger");
 
 const password = process.argv[2];
 if (!password || password.length < 10) {
-  console.error('Provide a password of at least 10 characters: npm run seed-password -- "your-password"');
+  logger.error('Provide a password of at least 10 characters: npm run seed-password -- "your-password"');
   process.exit(1);
 }
 
 (async () => {
-  await mongoose.connect(process.env.MONGO_URI);
+  const { connectDB, disconnectDB } = require("../src/db");
+  const { seedPassword } = require("../src/seed");
+  await connectDB();
   await seedPassword(password, { force: true });
-  await mongoose.disconnect();
+  await disconnectDB();
 })().catch((err) => {
-  console.error(err);
-  process.exit(1);
+  logger.error("Setting the password failed", { error: err.message });
+  setTimeout(() => process.exit(1), 200);
 });

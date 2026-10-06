@@ -2,15 +2,16 @@
 //   npm run seed            -> only fills empty collections
 //   npm run seed -- --force -> wipes and re-seeds everything
 require("dotenv").config();
-const mongoose = require("mongoose");
-const { seedContent } = require("../src/seed");
+const logger = require("../src/utils/logger");
 
 (async () => {
-  await mongoose.connect(process.env.MONGO_URI);
+  const { connectDB, disconnectDB } = require("../src/db"); // validates .env and logs connection problems with a hint
+  const { seedContent } = require("../src/seed");
+  await connectDB();
   await seedContent({ force: process.argv.includes("--force") });
-  console.log("done");
-  await mongoose.disconnect();
+  logger.info("Seed finished");
+  await disconnectDB();
 })().catch((err) => {
-  console.error(err);
-  process.exit(1);
+  logger.error("Seed failed", { error: err.message });
+  setTimeout(() => process.exit(1), 200);
 });

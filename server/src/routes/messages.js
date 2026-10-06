@@ -1,20 +1,23 @@
 const express = require("express");
-const rateLimit = require("express-rate-limit");
 const nodemailer = require("nodemailer");
 const schemas = require("../validators/schemas");
 const escapeHtml = require("../utils/escapeHtml");
 const { Message } = require("../models");
-const { asyncHandler, validate, requireAuth, HttpError } = require("../middleware");
+const { asyncHandler, validate, limiter, requireAuth, audit, reqMeta, HttpError } = require("../middleware");
 const logger = require("../utils/logger");
+const env = require("../config/env");
 
 const router = express.Router();
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: { user: process.env.GMAIL_USER, pass: process.env.GMAIL_APP_PASSWORD },
-});
+const transporter = env.mailEnabled
+  ? nodemailer.createTransport({ service: "gmail", auth: { user: env.GMAIL_USER, pass: env.GMAIL_APP_PASSWORD } })
+  : null;
 
-const contactLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false });
+const contactLimiter = limiter("contact form", {
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  message: "Too many messages. Please try again later.",
+});
 
 // Public: contact form.
 router.post(
@@ -23,15 +26,23 @@ router.post(
   validate(schemas.message),
   asyncHandler(async (req, res) => {
     const { name, email, message } = req.body;
-    await Message.create({ name, email, message });
+    const saved = await Message.create({ name, email, message });
+    // Logged by id, not by sender details: the inbox in /settings has those.
+    logger.info("Contact message received", { ...reqMeta(req), messageId: saved.id, length: message.length });
+
+    if (!transporter) {
+      logger.warn("Contact mail skipped: Gmail is not configured", { messageId: saved.id });
+      return res.status(201).json({ success: true });
+    }
 
     // The message is already stored, so a mail failure should not fail the request.
     // Awaited because serverless hosts (Vercel) freeze the function after responding.
     const safe = { name: escapeHtml(name), email: escapeHtml(email), message: escapeHtml(message).replace(/\n/g, "<br/>") };
+    const started = Date.now();
     await transporter
       .sendMail({
-        from: `"Portfolio Contact" <${process.env.GMAIL_USER}>`,
-        to: process.env.CONTACT_TO || process.env.GMAIL_USER,
+        from: `"Portfolio Contact" <${env.GMAIL_USER}>`,
+        to: env.CONTACT_TO || env.GMAIL_USER,
         replyTo: email,
         subject: `New message from ${name.replace(/[\r\n]/g, " ")} (Portfolio)`,
         html: `
@@ -45,8 +56,8 @@ router.post(
             </div>
           </div>`,
       })
-      .then(() => logger.info("Contact mail sent", { from: email }))
-      .catch((err) => logger.error("Contact mail failed", { error: err.message, from: email }));
+      .then(() => logger.info("Contact mail sent", { reqId: req.id, messageId: saved.id, ms: Date.now() - started }))
+      .catch((err) => logger.error("Contact mail failed", { reqId: req.id, messageId: saved.id, error: err.message, code: err.code }));
 
     res.status(201).json({ success: true });
   })
@@ -62,9 +73,11 @@ router.get(
 router.patch(
   "/messages/:id/read",
   requireAuth,
+  validate(schemas.idParam, "params"),
   asyncHandler(async (req, res) => {
     const doc = await Message.findByIdAndUpdate(req.params.id, { read: true }, { new: true });
     if (!doc) throw new HttpError(404, "Not found");
+    audit(req, "Message marked read", { id: doc.id });
     res.json(doc);
   })
 );
@@ -72,9 +85,11 @@ router.patch(
 router.delete(
   "/messages/:id",
   requireAuth,
+  validate(schemas.idParam, "params"),
   asyncHandler(async (req, res) => {
     const doc = await Message.findByIdAndDelete(req.params.id);
     if (!doc) throw new HttpError(404, "Not found");
+    audit(req, "Message deleted", { id: doc.id });
     res.status(204).end();
   })
 );

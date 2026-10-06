@@ -59,6 +59,19 @@
       "order": 1
     }
   ],
+  "education": [
+    {
+      "institution": "Galgotias University",
+      "degree": "B.Tech",
+      "field": "Computer Science",
+      "location": "Gautam Buddh Nagar, Uttar Pradesh",
+      "start": "Sep 2022",
+      "end": "Jun 2026",
+      "grade": "CGPA 7.93",
+      "details": [],
+      "order": 0
+    }
+  ],
   "projects": [
     {
       "title": "Enterprise School Management System",
