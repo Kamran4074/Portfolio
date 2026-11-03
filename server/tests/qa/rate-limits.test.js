@@ -56,3 +56,10 @@ test("uploads: 60 per hour", async () => {
   expect(statuses.filter((s) => s === 201)).toHaveLength(60);
   expect(statuses[60]).toBe(429);
 });
+
+test("refresh: 30 per 15 minutes", async () => {
+  const api = client();
+  const statuses = await hit(31, () => api.post("/api/auth/refresh").set("X-Requested-With", "XMLHttpRequest"));
+  expect(statuses.slice(0, 30).every((s) => s === 401)).toBe(true);
+  expect(statuses[30]).toBe(429);
+});

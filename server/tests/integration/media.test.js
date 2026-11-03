@@ -29,7 +29,7 @@ describe("screenshots", () => {
 
     const res = await api.get(`/api/screenshots/${body.id}`).buffer(true).parse(binary).expect(200);
     expect(res.headers["content-type"]).toBe("image/webp");
-    expect(res.headers["cache-control"]).toBe("public, max-age=31536000, immutable");
+    expect(res.headers["cache-control"]).toBe("public, max-age=31536000, s-maxage=31536000, immutable");
     expect(res.headers["cross-origin-resource-policy"]).toBe("cross-origin");
     expect(res.body.equals(file)).toBe(true);
   });
@@ -93,6 +93,6 @@ describe("profile photo", () => {
     const api = client();
     await api.put("/api/profile/photo").set(bearer(token)).set("Content-Type", "image/png").send(png()).expect(200);
     const res = await api.get("/api/profile/photo").expect(200);
-    expect(res.headers["cache-control"]).toBe("public, max-age=300");
+    expect(res.headers["cache-control"]).toBe("public, max-age=300, s-maxage=300");
   });
 });

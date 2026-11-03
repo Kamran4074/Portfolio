@@ -12,12 +12,12 @@ const experience = z.object({
   order,
 });
 
-// A screenshot reference: { id, caption }. A bare id string (the first version of this
-// field) is still accepted and becomes { id, caption: "" }.
+// A screenshot reference: { id, thumb?, caption }. `thumb` is an 800px copy for phones.
+// A bare id string (the first version of this field) is still accepted.
 const screenshotId = z.string().regex(SCREENSHOT_ID, "Invalid screenshot id");
 const screenshot = z.union([
   screenshotId.transform((id) => ({ id, caption: "" })),
-  z.object({ id: screenshotId, caption: optStr(200) }),
+  z.object({ id: screenshotId, thumb: screenshotId.optional(), caption: optStr(200) }),
 ]);
 
 const project = z.object({

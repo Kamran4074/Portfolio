@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import api, { errorMessage, getToken, setToken } from "../api";
+import api, { errorMessage, getToken, logoutSession, refreshSession, setToken } from "../api";
 import { collections, profileConfig } from "./config";
 import Form from "./Form";
 import PasswordInput from "./PasswordInput";
 import PhotoEditor from "./PhotoEditor";
+import SecurityEditor from "./SecurityEditor";
 import "./admin.css";
 
 function Login({ onLogin }) {
@@ -17,7 +18,7 @@ function Login({ onLogin }) {
     setError("");
     try {
       const { data } = await api.post("/auth/login", { password });
-      setToken(data.token);
+      setToken(data.accessToken);
       onLogin();
     } catch (err) {
       setError(err?.response?.status === 429 ? "Too many attempts. Try again in 15 minutes." : errorMessage(err));
@@ -55,7 +56,7 @@ function PasswordEditor({ notify }) {
     setSaving(true);
     try {
       const { data } = await api.put("/auth/password", { currentPassword: values.currentPassword, newPassword: values.newPassword });
-      setToken(data.token);
+      setToken(data.accessToken);
       setValues(blank);
       notify("Password changed. Other sessions were logged out.");
     } catch (err) {
@@ -224,17 +225,27 @@ function Inbox({ notify }) {
   );
 }
 
-const tabs = [profileConfig, ...collections, { key: "inbox", label: "Inbox" }, { key: "password", label: "Password" }];
+const tabs = [
+  profileConfig,
+  ...collections,
+  { key: "inbox", label: "Inbox" },
+  { key: "password", label: "Password" },
+  { key: "security", label: "Security" },
+];
 
 export default function Admin() {
   const [authed, setAuthed] = useState(null); // null = checking
   const [tab, setTab] = useState("profile");
   const [toast, setToast] = useState(null);
 
-  const logout = useCallback(() => {
+  // Session already ended on the server (expired, revoked, signed out everywhere).
+  const endSession = useCallback(() => {
     setToken(null);
     setAuthed(false);
   }, []);
+
+  // "Log out" button: revoke this login's refresh token, then show the login screen.
+  const logout = useCallback(() => logoutSession().finally(endSession), [endSession]);
 
   const notify = useCallback((text, error = false) => {
     setToast({ text, error });
@@ -251,19 +262,22 @@ export default function Admin() {
     return () => meta.remove();
   }, []);
 
+  // On load: a stored access token is checked with /auth/me (if it has expired, api.js
+  // refreshes it from the cookie and retries). Without one, try the refresh cookie directly.
+  // Neither working shows the login screen.
   useEffect(() => {
-    if (!getToken()) return setAuthed(false);
-    api.get("/auth/me").then(() => setAuthed(true)).catch(logout);
-  }, [logout]);
+    const check = getToken() ? api.get("/auth/me") : refreshSession();
+    check.then(() => setAuthed(true), () => setAuthed(false));
+  }, []);
 
-  // Any 401 (expired token) drops back to the login screen.
+  // A 401 that survived the automatic refresh (see api.js) means the session is over.
   useEffect(() => {
     const id = api.interceptors.response.use(undefined, (err) => {
-      if (err?.response?.status === 401 && getToken()) logout();
+      if (err?.response?.status === 401 && err.config?.url !== "/auth/login") endSession();
       return Promise.reject(err);
     });
     return () => api.interceptors.response.eject(id);
-  }, [logout]);
+  }, [endSession]);
 
   if (authed === null) return <p className="muted" style={{ padding: 40 }}>Checking session…</p>;
   if (!authed) return <Login onLogin={() => setAuthed(true)} />;
@@ -289,6 +303,7 @@ export default function Admin() {
         {tab === "profile" && <ProfileEditor notify={notify} />}
         {tab === "inbox" && <Inbox notify={notify} />}
         {tab === "password" && <PasswordEditor notify={notify} />}
+        {tab === "security" && <SecurityEditor notify={notify} onSignedOut={endSession} />}
         {collections.some((c) => c.key === tab) && <CollectionEditor config={active} notify={notify} />}
       </main>
       {toast && <div className={`toast ${toast.error ? "err" : ""}`}>{toast.text}</div>}

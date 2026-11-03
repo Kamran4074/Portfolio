@@ -1,6 +1,7 @@
 const { Experience, Education, Project, SkillGroup, Certification, Achievement } = require("../../models");
 const createRepository = require("../collections/collection.repository");
 const profiles = require("./profile.repository");
+const { triggerRebuild } = require("../../utils/deployHook");
 
 const sections = {
   experience: createRepository(Experience),
@@ -18,4 +19,10 @@ async function getPublicContent() {
   return { profile, ...Object.fromEntries(keys.map((k, i) => [k, lists[i]])) };
 }
 
-module.exports = { getPublicContent, getProfile: profiles.get, updateProfile: profiles.update };
+async function updateProfile(data) {
+  const profile = await profiles.update(data);
+  await triggerRebuild("Profile changed");
+  return profile;
+}
+
+module.exports = { getPublicContent, getProfile: profiles.get, updateProfile };

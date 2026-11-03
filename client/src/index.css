@@ -560,6 +560,8 @@ a.contact-whatsapp:hover { border-color: #25d366; color: #25d366; }
 .field input:focus, .field textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .form-msg { margin-top: 12px; font-size: 0.88rem; text-align: center; min-height: 1.4em; }
 .form-msg:empty { margin-top: 0; min-height: 0; }
+/* Honeypot field: off-screen rather than display:none, which some bots skip. */
+.form-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .form-msg.ok { color: var(--ok); }
 .form-msg.err { color: var(--danger); }
 

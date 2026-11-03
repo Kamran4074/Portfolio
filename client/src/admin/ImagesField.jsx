@@ -27,9 +27,11 @@ export default function ImagesField({ field, shots, onChange, onBusy }) {
     try {
       for (const [i, file] of picked.entries()) {
         setStatus({ text: `Uploading ${i + 1} of ${picked.length}…` });
-        const blob = await toScreenshot(file);
-        const { data } = await api.post("/screenshots", blob, { headers: { "Content-Type": blob.type } });
-        if (!has(data.id)) added.push({ id: data.id, caption: "" });
+        const { large, small } = await toScreenshot(file);
+        const upload = (blob) => api.post("/screenshots", blob, { headers: { "Content-Type": blob.type } }).then((r) => r.data.id);
+        const id = await upload(large);
+        const thumb = small ? await upload(small) : undefined;
+        if (!has(id)) added.push({ id, ...(thumb && { thumb }), caption: "" });
       }
       const skipped = files.length - picked.length;
       setStatus({ text: `Added ${added.length}.${skipped ? ` ${skipped} skipped (max ${max}).` : ""} Add captions, then Save to publish.` });
@@ -60,7 +62,7 @@ export default function ImagesField({ field, shots, onChange, onBusy }) {
       <ul className="shots-grid">
         {shots.map((s, i) => (
           <li key={s.id} className="shot">
-            <img src={shotSrc(s.id)} alt={s.caption || `Screenshot ${i + 1}`} loading="lazy" />
+            <img src={shotSrc(s.thumb || s.id)} alt={s.caption || `Screenshot ${i + 1}`} loading="lazy" />
             <span className="photo-badge">{i === 0 ? "Cover" : pad(i + 1)}</span>
             <input
               className="shot-caption"

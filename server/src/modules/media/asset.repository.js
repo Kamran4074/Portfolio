@@ -12,11 +12,11 @@ const removeById = (id) => Asset.deleteOne({ _id: id });
 const removeUnused = async ({ prefix, keep, before }) =>
   (await Asset.deleteMany({ _id: { $regex: `^${prefix}`, $nin: keep }, createdAt: { $lt: before } })).deletedCount;
 
-// Every screenshot id any project uses: { id, caption } entries, plus bare-string
-// entries saved by the first version of the field.
+// Every screenshot id any project uses: full-size ids and phone-size thumbs of
+// { id, thumb, caption } entries, plus bare-string entries from the first version.
 const referencedScreenshotIds = async () => {
-  const [ids, raw] = await Promise.all([Project.distinct("images.id"), Project.distinct("images")]);
-  return [...new Set([...ids, ...raw.filter((x) => typeof x === "string")])];
+  const [ids, thumbs, raw] = await Promise.all([Project.distinct("images.id"), Project.distinct("images.thumb"), Project.distinct("images")]);
+  return [...new Set([...ids, ...thumbs, ...raw.filter((x) => typeof x === "string")])];
 };
 
 module.exports = { findById, save, removeById, removeUnused, referencedScreenshotIds };

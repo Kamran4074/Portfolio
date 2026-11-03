@@ -2,6 +2,7 @@
 // otherwise JPEG. A 5 MB phone photo or screenshot becomes a small file.
 const SIZE = 480;
 const SHOT_WIDTH = 1600; // project screenshots: sharp on 2x screens at the ~760px featured card
+export const SMALL_WIDTH = 800; // phone copy: sharp on 2x phone screens
 export const MAX_INPUT_BYTES = 15 * 1024 * 1024;
 
 async function readBitmap(file) {
@@ -45,17 +46,27 @@ export async function toSquarePhoto(file) {
   return encode(canvas, 0.85);
 }
 
-// Project screenshot: not cropped (the card shows it top-aligned), only scaled down to
-// 1600px wide. Usually 80-250 KB.
-export async function toScreenshot(file) {
-  const bitmap = await readBitmap(file);
-  const scale = Math.min(1, SHOT_WIDTH / bitmap.width);
+const scaled = (bitmap, width) => {
+  const scale = Math.min(1, width / bitmap.width);
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
   const ctx = canvas.getContext("2d");
   ctx.imageSmoothingQuality = "high";
   ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close?.();
-  return encode(canvas, 0.82);
+  return canvas;
+};
+
+// Project screenshot: not cropped (the card shows it top-aligned), scaled down to 1600px
+// wide (usually 80-250 KB), plus an 800px copy for phones (about a quarter of the bytes).
+// `small` is null when the picture is already narrow enough to serve as is.
+export async function toScreenshot(file) {
+  const bitmap = await readBitmap(file);
+  try {
+    const large = await encode(scaled(bitmap, SHOT_WIDTH), 0.82);
+    const small = bitmap.width > SMALL_WIDTH * 1.2 ? await encode(scaled(bitmap, SMALL_WIDTH), 0.8) : null;
+    return { large, small };
+  } finally {
+    bitmap.close?.();
+  }
 }

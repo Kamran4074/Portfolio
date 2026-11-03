@@ -1,10 +1,10 @@
 import Icon from "../Icon";
-import { altOf, host, slug } from "./media";
+import { altOf, host, SHOT_SIZES, slug } from "./media";
 
 // One screenshot (or a generated cover in the site's style), linking to the project.
 export default function ProjectCover({ project: p, shot, link }) {
   const inner = shot ? (
-    <img src={shot.src} alt={altOf(p, shot)} width="1200" height="750" loading="lazy" decoding="async" />
+    <img src={shot.src} srcSet={shot.srcSet} sizes={shot.srcSet ? SHOT_SIZES : undefined} alt={altOf(p, shot)} width="1200" height="750" loading="lazy" decoding="async" />
   ) : (
     <div className="cover-gen" aria-hidden="true">
       <div className="cover-bar"><i /><i /><i /><span>{host(p.demoUrl) || `~/projects/${slug(p.title)}`}</span></div>

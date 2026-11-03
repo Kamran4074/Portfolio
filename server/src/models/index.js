@@ -63,7 +63,7 @@ const Project = mongoose.model(
       image: String,
       imageAlt: String,
       // Uploaded screenshots (modules/media), in display order. Used before `image`.
-      images: [new Schema({ id: { type: String, required: true }, caption: String }, { _id: false })],
+      images: [new Schema({ id: { type: String, required: true }, thumb: String, caption: String }, { _id: false })],
       featured: { type: Boolean, default: false },
       order: { type: Number, default: 0, index: true },
     },
@@ -147,6 +147,29 @@ const Setting = mongoose.model(
     {
       passwordHash: { type: String, required: true },
       tokenVersion: { type: Number, default: 0 },
+      // Session lifetimes, editable from the Security tab (see modules/auth/auth.policy.js).
+      accessTokenMinutes: Number,
+      refreshTokenDays: Number,
+    },
+    opts
+  )
+);
+
+// One row per refresh token (the raw token is only ever in the browser's HttpOnly cookie;
+// this stores its SHA-256). Tokens from one login share a `family`: every refresh rotates
+// to a new row, and reusing a rotated token revokes the whole family (likely theft).
+const RefreshToken = mongoose.model(
+  "RefreshToken",
+  new Schema(
+    {
+      tokenHash: { type: String, required: true, unique: true },
+      family: { type: String, required: true, index: true },
+      tokenVersion: { type: Number, default: 0 },
+      expiresAt: { type: Date, required: true, expires: 0 }, // MongoDB TTL index deletes expired rows
+      revokedAt: Date,
+      replacedBy: String, // tokenHash of the token it was rotated to
+      ip: String,
+      userAgent: String,
     },
     opts
   )
@@ -175,4 +198,11 @@ const Heartbeat = mongoose.model(
   new Schema({ _id: String, lastPing: Date, count: { type: Number, default: 0 }, source: String }, { versionKey: false })
 );
 
-module.exports = { Asset, Heartbeat, Setting, Profile, Experience, Education, Project, SkillGroup, Certification, Achievement, Message };
+// Rate-limit counters shared by every server instance (middleware/mongoRateLimitStore.js).
+// _id is "<limiter>:<ip>"; MongoDB's TTL index removes a row once its window has ended.
+const RateLimit = mongoose.model(
+  "RateLimit",
+  new Schema({ _id: String, hits: Number, resetAt: { type: Date, expires: 0 } }, { versionKey: false })
+);
+
+module.exports = { Asset, Heartbeat, RateLimit, RefreshToken, Setting, Profile, Experience, Education, Project, SkillGroup, Certification, Achievement, Message };

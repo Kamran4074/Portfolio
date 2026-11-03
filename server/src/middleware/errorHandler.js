@@ -25,7 +25,7 @@ const errorHandler = (err, req, res, _next) => {
     // The id lets a visitor's bug report be matched to this exact log line.
     return res.status(status).json({ error: status === 500 ? "Internal server error" : err.message, requestId: req.id });
   }
-  res.status(status).json({ error: err.message });
+  res.status(status).json(err instanceof HttpError && err.code ? { error: err.message, code: err.code } : { error: err.message });
 };
 
 module.exports = { notFound, errorHandler };

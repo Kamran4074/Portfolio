@@ -3,7 +3,7 @@ import { AnimatePresence, LazyMotion, MotionConfig, domAnimation, m, useScroll, 
 import Icon from "../Icon";
 import Lightbox from "./Lightbox";
 import useDragScroll from "./useDragScroll";
-import { altOf, pad, prefersReducedMotion } from "./media";
+import { altOf, pad, prefersReducedMotion, SHOT_SIZES } from "./media";
 
 const SPRING = { type: "spring", stiffness: 300, damping: 30 };
 
@@ -92,7 +92,7 @@ export default function ProjectGallery({ project, shots }) {
                     data-cursor="Expand"
                     tabIndex={isActive ? 0 : -1}
                   >
-                    <img src={shot.src} alt={altOf(project, shot)} width="1200" height="750" loading="lazy" decoding="async" draggable={false} />
+                    <img src={shot.src} srcSet={shot.srcSet} sizes={shot.srcSet ? SHOT_SIZES : undefined} alt={altOf(project, shot)} width="1200" height="750" loading="lazy" decoding="async" draggable={false} />
                   </button>
                   <figcaption className="gallery-caption">
                     <span className="gallery-index mono">{pad(i + 1)}</span>

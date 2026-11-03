@@ -26,8 +26,11 @@ const app = express();
 // A blocked origin is logged once: it is almost always a missing entry in CLIENT_ORIGIN.
 const origins = env.CLIENT_ORIGIN || [];
 const warnedOrigins = new Set();
+// credentials: the browser may send the refresh-token cookie to /api/auth when the site
+// calls the API on another domain (only for the listed origins).
 const corsOptions = origins.length
   ? {
+      credentials: true,
       origin: (origin, done) => {
         if (!origin || origins.includes(origin)) return done(null, true);
         if (!warnedOrigins.has(origin)) {

@@ -18,14 +18,14 @@ const freshIp = () => {
 // supertest bound to one client IP.
 function client(ip = freshIp()) {
   const wrap = (method) => (url) => request(app)[method](url).set("X-Forwarded-For", ip);
-  return { ip, get: wrap("get"), post: wrap("post"), put: wrap("put"), patch: wrap("patch"), delete: wrap("delete") };
+  return { ip, get: wrap("get"), post: wrap("post"), put: wrap("put"), patch: wrap("patch"), delete: wrap("delete"), options: wrap("options") };
 }
 
 // Stores the admin password (low bcrypt cost keeps tests fast) and returns a valid token.
 async function seedAdmin({ password = PASSWORD, tokenVersion = 0 } = {}) {
   await Setting.deleteMany({});
   await Setting.create({ passwordHash: await bcrypt.hash(password, 4), tokenVersion });
-  return authService.signToken(tokenVersion);
+  return authService.signAccessToken(tokenVersion);
 }
 
 const bearer = (token) => ({ Authorization: `Bearer ${token}` });

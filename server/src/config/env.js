@@ -21,11 +21,18 @@ const schema = z.object({
   JWT_SECRET: optional(z.string().min(16, "JWT_SECRET should be at least 16 characters (32+ recommended)")),
   ADMIN_PASSWORD: optional(z.string()),
   ADMIN_PASSWORD_HASH: optional(z.string().regex(/^\$2[aby]\$\d{2}\$/, "ADMIN_PASSWORD_HASH must be a bcrypt hash")),
+  // SameSite for the refresh-token cookie. "lax" when the site reaches the API on its own
+  // domain (Vite proxy in dev, a Vercel rewrite in production); "none" when the site calls
+  // the API on another domain (needs HTTPS; Safari may still block it as a third-party cookie).
+  REFRESH_COOKIE_SAMESITE: optional(z.enum(["lax", "strict", "none"])),
 
   GMAIL_USER: optional(z.string().email("GMAIL_USER must be an email address")),
   GMAIL_APP_PASSWORD: optional(z.string()),
   CONTACT_TO: optional(z.string().email("CONTACT_TO must be an email address")),
 
+  // Vercel deploy hook of the client project: called after every content change in /settings,
+  // so the pre-rendered HTML (what search engines and link previews see) is rebuilt.
+  DEPLOY_HOOK_URL: optional(z.string().url().refine((u) => u.startsWith("https://"), "DEPLOY_HOOK_URL must be https")),
   KEEPALIVE_TOKEN: optional(z.string().min(8)),
   CRON_SECRET: optional(z.string()),
   VERCEL: optional(z.string()),
@@ -46,6 +53,8 @@ const env = parsed.data;
 
 // Optional features: say once at startup what is switched off, so it is not a mystery later.
 if (!env.JWT_SECRET) logger.warn("JWT_SECRET is not set: /settings login is disabled");
+// Not an error, so an existing deployment keeps starting; a short secret is easier to brute-force offline.
+else if (env.JWT_SECRET.length < 32) logger.warn("JWT_SECRET is shorter than 32 characters: generate a longer one (see .env.example)");
 if (!env.GMAIL_USER || !env.GMAIL_APP_PASSWORD) logger.warn("GMAIL_USER/GMAIL_APP_PASSWORD not set: contact messages are saved but not emailed");
 if (env.NODE_ENV === "production" && !env.CLIENT_ORIGIN) logger.warn("CLIENT_ORIGIN is not set: CORS allows any origin");
 

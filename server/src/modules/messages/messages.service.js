@@ -7,7 +7,12 @@ const logger = require("../../utils/logger");
 // is logged and does not fail the request. Awaited because serverless hosts (Vercel)
 // freeze the function after responding.
 // Logged by id, not by sender details: the inbox in /settings has those.
-async function submit(contact, { reqId } = {}) {
+async function submit({ website, ...contact }, { reqId } = {}) {
+  // A filled honeypot is a bot: answer as if it worked (so it learns nothing), store nothing.
+  if (website) {
+    logger.warn("Contact message dropped: honeypot filled", { reqId });
+    return { saved: null, mailed: false, spam: true };
+  }
   const saved = await repo.create(contact);
   logger.info("Contact message received", { reqId, messageId: saved.id, length: contact.message.length });
 

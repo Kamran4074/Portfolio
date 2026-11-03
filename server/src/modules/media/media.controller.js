@@ -10,7 +10,9 @@ function sendImage(req, res, asset, { immutable }) {
   res.set({
     "Content-Type": asset.contentType,
     ETag: etag,
-    "Cache-Control": immutable ? "public, max-age=31536000, immutable" : "public, max-age=300",
+    // s-maxage lets Vercel's CDN keep the image too, so repeat views never reach the
+    // function or the database.
+    "Cache-Control": immutable ? "public, max-age=31536000, s-maxage=31536000, immutable" : "public, max-age=300, s-maxage=300",
     // The portfolio is served from a different origin than the API; helmet's default
     // (same-origin) would make the browser refuse to show the image.
     "Cross-Origin-Resource-Policy": "cross-origin",

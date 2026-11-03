@@ -16,7 +16,58 @@ test("a password change signs out every token issued before it", async () => {
   // Without tokenVersion a stolen token would stay valid for 2h after the change.
   const oldToken = await seedAdmin();
   await client().put("/api/auth/password").set(bearer(oldToken)).send({ currentPassword: PASSWORD, newPassword: "new-password-123" }).expect(200);
-  await client().get("/api/auth/me").set(bearer(oldToken)).expect(401, { error: "Session expired, please log in again" });
+  await client().get("/api/auth/me").set(bearer(oldToken)).expect(401, { error: "Session expired, please log in again", code: "SESSION_EXPIRED" });
+});
+
+describe("refresh tokens", () => {
+  const XHR = { "X-Requested-With": "XMLHttpRequest" };
+  const cookieOf = (res) => res.headers["set-cookie"].find((c) => c.startsWith("refresh_token=")).split(";")[0];
+  const login = async (api) => cookieOf(await api.post("/api/auth/login").send({ password: PASSWORD }).expect(200));
+  const { RefreshToken } = require("../../src/models");
+
+  test("a stolen, already-rotated refresh token ends that login for the attacker and the owner", async () => {
+    // Rotation alone is not enough: replaying an old token must also kill the new one.
+    await seedAdmin();
+    const api = client();
+    const stolen = await login(api);
+    const owners = cookieOf(await api.post("/api/auth/refresh").set(XHR).set("Cookie", stolen).expect(200));
+    // Move the rotation outside the race grace window, as if the thief replays it later.
+    await RefreshToken.updateMany({ revokedAt: { $ne: null } }, { $set: { revokedAt: new Date(Date.now() - 60 * 1000) } });
+
+    await client().post("/api/auth/refresh").set(XHR).set("Cookie", stolen).expect(401);
+    await api.post("/api/auth/refresh").set(XHR).set("Cookie", owners).expect(401);
+  });
+
+  test("two tabs refreshing at once do not sign the user out", async () => {
+    // The loser of the race gets REFRESH_RACE (no revocation) and retries with the new cookie.
+    await seedAdmin();
+    const api = client();
+    const cookie = await login(api);
+    const [a, b] = await Promise.all([
+      api.post("/api/auth/refresh").set(XHR).set("Cookie", cookie),
+      api.post("/api/auth/refresh").set(XHR).set("Cookie", cookie),
+    ]);
+    const winner = [a, b].find((r) => r.status === 200);
+    const loser = [a, b].find((r) => r !== winner);
+    expect(winner).toBeDefined();
+    if (loser.status !== 200) expect(loser.body.code).toBe("REFRESH_RACE");
+    await api.post("/api/auth/refresh").set(XHR).set("Cookie", cookieOf(winner)).expect(200);
+  });
+
+  test("raw refresh tokens are never stored, only their hash", async () => {
+    await seedAdmin();
+    const cookie = await login(client());
+    const raw = cookie.split("=")[1];
+    const rows = await RefreshToken.find().lean();
+    expect(rows).toHaveLength(1);
+    expect(JSON.stringify(rows)).not.toContain(raw);
+  });
+
+  test("the pre-refresh-token 2h JWT is no longer accepted", async () => {
+    await seedAdmin();
+    const legacy = require("jsonwebtoken").sign({ sub: "admin", role: "admin", tv: 0 }, process.env.JWT_SECRET, { expiresIn: "2h" });
+    await client().get("/api/auth/me").set(bearer(legacy)).expect(401);
+  });
 });
 
 test("seeding never overwrites content edited in /settings", async () => {

@@ -22,6 +22,20 @@ describe("CORS", () => {
     const res = await client().get("/api").set("Origin", "http://evil.test");
     expect(res.headers["access-control-allow-origin"]).toBeUndefined();
   });
+
+  test("credentials (the refresh cookie) are allowed for the site origin only", async () => {
+    const ok = await client().options("/api/auth/refresh").set("Origin", "http://allowed.test").set("Access-Control-Request-Method", "POST");
+    expect(ok.headers["access-control-allow-credentials"]).toBe("true");
+    const evil = await client().options("/api/auth/refresh").set("Origin", "http://evil.test").set("Access-Control-Request-Method", "POST");
+    expect(evil.headers["access-control-allow-origin"]).toBeUndefined();
+  });
+});
+
+describe("refresh cookie CSRF guard", () => {
+  test("refresh and logout without X-Requested-With are 403", async () => {
+    await client().post("/api/auth/refresh").set("Cookie", "refresh_token=x").expect(403);
+    await client().post("/api/auth/logout").set("Cookie", "refresh_token=x").expect(403);
+  });
 });
 
 describe("request ids", () => {

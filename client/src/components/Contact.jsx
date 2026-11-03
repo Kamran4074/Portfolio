@@ -2,7 +2,8 @@ import { useState } from "react";
 import api, { errorMessage } from "../api";
 import Icon, { iconFor } from "./Icon";
 
-const empty = { name: "", email: "", message: "" };
+// `website` is a honeypot: hidden from people, filled in by spam bots (see .form-trap).
+const empty = { name: "", email: "", message: "", website: "" };
 
 // wa.me needs digits only, with country code (10-digit numbers are assumed Indian).
 const whatsappLink = (number, name = "") => {
@@ -101,6 +102,10 @@ export default function Contact({ index, profile }) {
             <div className="field">
               <label htmlFor="c-msg">Message</label>
               <textarea id="c-msg" name="message" rows={5} value={form.message} onChange={handleChange} required minLength={5} maxLength={3000} />
+            </div>
+            <div className="form-trap" aria-hidden="true">
+              <label htmlFor="c-website">Website</label>
+              <input id="c-website" name="website" tabIndex={-1} autoComplete="off" value={form.website} onChange={handleChange} />
             </div>
             <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
               {loading ? "Sending…" : "Send message"} {!loading && <span className="btn-arrow"><Icon name="arrow" size={15} /></span>}

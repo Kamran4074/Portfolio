@@ -146,7 +146,7 @@ export const toForm = (fields, doc = {}) =>
       if (f.type === "number") return [f.name, v ?? 0];
       if (f.type === "pairs") return [f.name, (v || []).map((row) => ({ ...row }))];
       // A bare id string is the first version of this field.
-      if (f.type === "images") return [f.name, (v || []).map((s) => (typeof s === "string" ? { id: s, caption: "" } : { id: s.id, caption: s.caption || "" }))];
+      if (f.type === "images") return [f.name, (v || []).map((s) => (typeof s === "string" ? { id: s, caption: "" } : { id: s.id, ...(s.thumb && { thumb: s.thumb }), caption: s.caption || "" }))];
       return [f.name, v ?? ""];
     })
   );
@@ -159,7 +159,7 @@ export const fromForm = (fields, values) =>
       if (f.type === "tags") return [f.name, v.split(",").map((s) => s.trim()).filter(Boolean)];
       if (f.type === "number") return [f.name, Number(v) || 0];
       if (f.type === "pairs") return [f.name, v.filter((row) => Object.values(row).some((x) => String(x || "").trim()))];
-      if (f.type === "images") return [f.name, v.map((s) => ({ id: s.id, caption: s.caption.trim() }))];
+      if (f.type === "images") return [f.name, v.map((s) => ({ id: s.id, ...(s.thumb && { thumb: s.thumb }), caption: s.caption.trim() }))];
       return [f.name, typeof v === "string" ? v.trim() : v];
     })
   );

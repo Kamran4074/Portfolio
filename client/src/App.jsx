@@ -47,8 +47,8 @@ function useMotion(content) {
   }, [content]);
 }
 
-export function Portfolio() {
-  const content = useContent();
+export function Portfolio({ initialContent } = {}) {
+  const content = useContent(initialContent);
   const { profile, experience, education, projects, skills, certifications, achievements } = content;
   useMotion(content);
 

@@ -12,6 +12,7 @@ const createRepository = require("./collection.repository");
 const createService = require("./collection.service");
 const createController = require("./collection.controller");
 const screenshotService = require("../media/screenshot.service");
+const { triggerRebuild } = require("../../utils/deployHook");
 
 const definitions = [
   { path: "/experience", Model: Experience, schema: schemas.experience },
@@ -23,7 +24,12 @@ const definitions = [
 ];
 
 function collectionRouter({ Model, schema, afterWrite }) {
-  const service = createService(createRepository(Model), { afterWrite });
+  // Every change also rebuilds the pre-rendered site (no-op without DEPLOY_HOOK_URL).
+  const afterChange = async () => {
+    await afterWrite?.();
+    await triggerRebuild(`${Model.modelName} changed`);
+  };
+  const service = createService(createRepository(Model), { afterWrite: afterChange });
   const controller = createController(service, Model.modelName);
   const router = express.Router();
   router.get("/", controller.list);
