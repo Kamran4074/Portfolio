@@ -3,6 +3,7 @@
 //   lines  -> string[] edited one item per line
 //   tags   -> string[] edited as comma-separated values
 //   pairs  -> object[] with sub-fields (e.g. socials, stats)
+//   images -> { id, caption }[] of uploaded screenshots, at most `max`
 // To add a field: add it to the Mongoose model, the Zod schema, and here.
 
 export const profileConfig = {
@@ -83,8 +84,15 @@ export const collections = [
       { name: "tech", label: "Tech", type: "tags" },
       { name: "demoUrl", label: "Live demo URL", type: "url" },
       { name: "githubUrl", label: "GitHub URL", type: "url" },
-      { name: "image", label: "Screenshot URL", type: "url", hint: "Optional. A 16:10 screenshot (WebP/PNG, ~1200px wide). Without one, a generated cover is shown." },
-      { name: "imageAlt", label: "Screenshot description", hint: "Describe what the screenshot shows, for screen readers and Google Images." },
+      {
+        name: "images",
+        label: "Screenshots",
+        type: "images",
+        max: 10,
+        hint: "Up to 10. Choose or drop JPEG, PNG or WebP files; they are resized automatically. Each caption is shown under its picture. The first one is the cover; with more than one, the card becomes a scrollable gallery.",
+      },
+      { name: "image", label: "Screenshot URL (optional)", type: "url", hint: "Only used when no screenshots are uploaded above. Without either, a generated cover is shown." },
+      { name: "imageAlt", label: "Screenshot description", hint: "Describe what the screenshots show, for screen readers and Google Images." },
       { name: "featured", label: "Featured (wide card)", type: "bool" },
       { name: "order", label: "Order", type: "number" },
     ],
@@ -137,6 +145,8 @@ export const toForm = (fields, doc = {}) =>
       if (f.type === "bool") return [f.name, !!v];
       if (f.type === "number") return [f.name, v ?? 0];
       if (f.type === "pairs") return [f.name, (v || []).map((row) => ({ ...row }))];
+      // A bare id string is the first version of this field.
+      if (f.type === "images") return [f.name, (v || []).map((s) => (typeof s === "string" ? { id: s, caption: "" } : { id: s.id, caption: s.caption || "" }))];
       return [f.name, v ?? ""];
     })
   );
@@ -149,6 +159,7 @@ export const fromForm = (fields, values) =>
       if (f.type === "tags") return [f.name, v.split(",").map((s) => s.trim()).filter(Boolean)];
       if (f.type === "number") return [f.name, Number(v) || 0];
       if (f.type === "pairs") return [f.name, v.filter((row) => Object.values(row).some((x) => String(x || "").trim()))];
+      if (f.type === "images") return [f.name, v.map((s) => ({ id: s.id, caption: s.caption.trim() }))];
       return [f.name, typeof v === "string" ? v.trim() : v];
     })
   );

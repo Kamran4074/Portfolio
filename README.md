@@ -53,7 +53,39 @@ Never logged: passwords, tokens, request bodies or the MongoDB URI.
 
 **Zod** validates:
 - the environment at startup (`server/src/config/env.js`): a bad `.env` stops the server with one line per problem;
-- request bodies, URL ids and query strings (`server/src/validators/schemas.js`, `validate(schema, "body" | "params" | "query")`).
+- request bodies, URL ids and query strings (each module's `*.schema.js`, `validate(schema, "body" | "params" | "query")`).
+
+**Rate limits** (`server/src/middleware/rateLimit.js`, per IP, standard `RateLimit-*` headers, every block logged):
+whole API 500 / 15 min (images have their own 2000 / 15 min), login 5 / 15 min, contact 5 / hour,
+uploads 60 / hour, keep-alive 10 / hour.
+
+## Server structure
+```
+server/src/
+  app.js            composition root: middleware, then one router per module
+  config/env.js     validated environment
+  core/             HttpError, asyncHandler, request context (log meta, audit)
+  middleware/       validate, requireAuth, rateLimit, requestLogger, errorHandler
+  models/           Mongoose schemas
+  modules/<feature>/  auth, content, collections, media, messages, health
+    *.routes.js       URLs + middleware (auth, rate limit, validation)
+    *.controller.js   HTTP in/out and audit log
+    *.service.js      business rules; no Express objects, throws HttpError
+    *.repository.js   data access; the only layer that touches models
+    *.schema.js       Zod request schemas
+```
+
+## Tests (`server/`, Jest)
+```bash
+npm test                  # everything (~25 s; the first run downloads MongoDB for the in-memory server)
+npm run test:unit         # one module at a time, collaborators mocked, no database
+npm run test:integration  # real HTTP (supertest) against the app and an in-memory MongoDB
+npm run test:regression   # one test per fixed bug, so it cannot come back
+npm run test:qa           # security headers, CORS, rate limits, error shape, limits, response time
+npm run test:coverage
+```
+Tests never read `.env` or touch the real database. `LOG_IN_TESTS=true` shows the app's logs.
+GitHub Actions (`.github/workflows/test.yml`) runs them, and the client build, on every push.
 
 ## API
 | Method | Path | Auth |
@@ -67,10 +99,13 @@ Never logged: passwords, tokens, request bodies or the MongoDB URI.
 | GET/PUT | `/api/profile` | PUT = admin |
 | GET/POST/PUT/DELETE | `/api/{experience,projects,skills,certifications,achievements}` | writes = admin |
 | GET/PATCH/DELETE | `/api/messages` | admin |
+| GET/PUT/DELETE | `/api/profile/photo` | GET public; PUT (raw image body) and DELETE admin |
+| GET | `/api/screenshots/:id` | public, cached for good (id = content hash) |
+| POST | `/api/screenshots` | admin, raw image body, returns `{ id }`; up to 10 per project, each `{ id, caption }` |
 
 ## Adding a new field
 1. Add it to the Mongoose model in `server/src/models/index.js`
-2. Add it to the Zod schema in `server/src/validators/schemas.js`
+2. Add it to the module's Zod schema (e.g. `server/src/modules/collections/collections.schema.js`)
 3. Add it to the field list in `client/src/admin/config.js` and render it in the component
 
 ## Frontend: rendering, SEO and animation

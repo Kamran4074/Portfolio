@@ -62,6 +62,8 @@ const Project = mongoose.model(
       githubUrl: String,
       image: String,
       imageAlt: String,
+      // Uploaded screenshots (modules/media), in display order. Used before `image`.
+      images: [new Schema({ id: { type: String, required: true }, caption: String }, { _id: false })],
       featured: { type: Boolean, default: false },
       order: { type: Number, default: 0, index: true },
     },
@@ -150,7 +152,8 @@ const Setting = mongoose.model(
   )
 );
 
-// Binary files uploaded from /settings (currently just the profile photo, ~20-40 KB WebP).
+// Binary files uploaded from /settings: the profile photo (~20-40 KB WebP) and project
+// screenshots ("shot-<hash>", ~80-250 KB each).
 // Stored in MongoDB because the API runs on Vercel, which has no persistent disk.
 const Asset = mongoose.model(
   "Asset",

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toForm, fromForm } from "./config";
+import ImagesField from "./ImagesField";
 
 function PairsField({ field, rows, onChange }) {
   const update = (i, key, value) => onChange(rows.map((r, j) => (j === i ? { ...r, [key]: value } : r)));
@@ -22,10 +23,12 @@ function PairsField({ field, rows, onChange }) {
 
 export default function Form({ fields, doc, onSave, onCancel, saving }) {
   const [values, setValues] = useState(() => toForm(fields, doc));
+  const [uploading, setUploading] = useState(false);
   const set = (name, value) => setValues((v) => ({ ...v, [name]: value }));
 
   const submit = (e) => {
     e.preventDefault();
+    if (uploading) return;
     onSave(fromForm(fields, values));
   };
 
@@ -40,6 +43,8 @@ export default function Form({ fields, doc, onSave, onCancel, saving }) {
             <input id={`f-${f.name}`} type="checkbox" checked={values[f.name]} onChange={(e) => set(f.name, e.target.checked)} />
           ) : f.type === "pairs" ? (
             <PairsField field={f} rows={values[f.name]} onChange={(rows) => set(f.name, rows)} />
+          ) : f.type === "images" ? (
+            <ImagesField field={f} shots={values[f.name]} onChange={(shots) => set(f.name, shots)} onBusy={setUploading} />
           ) : (
             <input
               id={`f-${f.name}`}
@@ -52,7 +57,7 @@ export default function Form({ fields, doc, onSave, onCancel, saving }) {
         </div>
       ))}
       <div className="admin-form-actions">
-        <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? "Saving…" : "Save"}</button>
+        <button type="submit" className="btn btn-primary" disabled={saving || uploading}>{saving ? "Saving…" : uploading ? "Uploading…" : "Save"}</button>
         {onCancel && <button type="button" className="btn btn-outline" onClick={onCancel}>Cancel</button>}
       </div>
     </form>

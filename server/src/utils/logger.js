@@ -26,13 +26,17 @@ const jsonFormat = format.combine(format.timestamp(), format.errors({ stack: tru
 const LEVELS = ["error", "warn", "info", "http", "verbose", "debug", "silly"];
 const level = LEVELS.includes(process.env.LOG_LEVEL) ? process.env.LOG_LEVEL : isProd ? "http" : "debug";
 
+// Tests expect errors on purpose; keep their output readable (LOG_IN_TESTS=true to see logs).
+const isTest = process.env.NODE_ENV === "test";
+
 const logger = createLogger({
   level,
+  silent: isTest && process.env.LOG_IN_TESTS !== "true",
   format: format.errors({ stack: true }),
   transports: [new transports.Console({ format: isProd ? jsonFormat : devFormat })],
 });
 
-if (process.env.LOG_TO_FILE !== "false" && !process.env.VERCEL) {
+if (process.env.LOG_TO_FILE !== "false" && !process.env.VERCEL && !isTest) {
   const file = (filename, level) =>
     new transports.File({ filename: path.join(logDir, filename), level, format: jsonFormat, maxsize: 5 * 1024 * 1024, maxFiles: 5 });
   logger.add(file("error.log", "error"));

@@ -1,13 +1,24 @@
+// Composition root: cross-cutting middleware, then one router per feature module.
+//
+// Each module in src/modules/<feature>/ is layered the same way:
+//   *.routes.js      URL + middleware wiring (auth, rate limit, validation)
+//   *.controller.js  HTTP in/out: reads req, calls the service, writes res, audit log
+//   *.service.js     business rules; no Express objects, throws HttpError
+//   *.repository.js  data access (Mongoose); the only layer that touches models
+//   *.schema.js      Zod request schemas
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-const crudRouter = require("./routes/crud");
-const schemas = require("./validators/schemas");
-const { Experience, Education, Project, SkillGroup, Certification, Achievement } = require("./models");
-const { notFound, errorHandler } = require("./middleware");
-const requestLogger = require("./middleware/requestLogger");
+const { requestLogger, rateLimit, notFound, errorHandler } = require("./middleware");
 const logger = require("./utils/logger");
 const env = require("./config/env");
+
+const healthRoutes = require("./modules/health/health.routes");
+const authRoutes = require("./modules/auth/auth.routes");
+const contentRoutes = require("./modules/content/content.routes");
+const messageRoutes = require("./modules/messages/messages.routes");
+const collectionRoutes = require("./modules/collections");
+const { photoRouter, screenshotRouter } = require("./modules/media/media.routes");
 
 const app = express();
 
@@ -38,18 +49,14 @@ app.use(express.json({ limit: "100kb" }));
 app.get(["/", "/api"], (_req, res) => res.json({ name: "Kamran Alam portfolio API", status: "ok", health: "/api/health/db" }));
 app.get(["/favicon.ico", "/favicon.png"], (_req, res) => res.status(204).end());
 
-app.use("/api/health", require("./routes/health"));
-
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/profile/photo", require("./routes/photo")); // before the /api/profile routes
-app.use("/api", require("./routes/content"));
-app.use("/api", require("./routes/messages"));
-app.use("/api/experience", crudRouter(Experience, schemas.experience));
-app.use("/api/education", crudRouter(Education, schemas.education));
-app.use("/api/projects", crudRouter(Project, schemas.project));
-app.use("/api/skills", crudRouter(SkillGroup, schemas.skillGroup));
-app.use("/api/certifications", crudRouter(Certification, schemas.certification));
-app.use("/api/achievements", crudRouter(Achievement, schemas.achievement));
+app.use("/api", rateLimit.api);
+app.use("/api/health", healthRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/profile/photo", photoRouter); // before /api/profile
+app.use("/api/screenshots", screenshotRouter);
+app.use("/api", contentRoutes);
+app.use("/api", messageRoutes);
+app.use("/api", collectionRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

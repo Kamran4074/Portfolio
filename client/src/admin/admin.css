@@ -72,3 +72,22 @@
 .photo-body h3 { margin-bottom: 4px; font-size: 1rem; }
 .photo-body .muted { font-size: 0.88rem; }
 .photo-body .admin-form-actions { margin-top: 14px; flex-wrap: wrap; }
+
+/* Project screenshots */
+.shots { padding: 8px; border-radius: 14px; border: 1.5px dashed var(--border-strong); transition: border-color 0.2s, background 0.2s; }
+.shots.is-dragging { border-color: var(--accent); background: var(--accent-soft); }
+.shots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; list-style: none; margin: 0; padding: 0; }
+.shot { position: relative; }
+.shot img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; border-radius: 10px; background: var(--surface-2); }
+.shot .photo-badge { top: 8px; bottom: auto; left: 8px; transform: none; }
+.shot-caption { width: 100%; margin-top: 6px; padding: 6px 8px; font-size: 0.8rem; }
+.shot-actions { display: flex; gap: 4px; margin-top: 6px; }
+.shot-actions .btn { flex: 1; padding-inline: 0; justify-content: center; }
+.shot-add {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  width: 100%; aspect-ratio: 16 / 10; border: 1px solid var(--border); border-radius: 10px; cursor: pointer;
+  background: var(--surface-2); color: var(--text); font: inherit; font-weight: 600; font-size: 0.88rem;
+}
+.shot-add:hover, .shot-add:focus-visible { border-color: var(--accent); color: var(--accent); }
+.shot-add small { color: var(--muted); font-family: var(--mono); font-weight: 400; }
+.shots .form-msg { margin: 8px 2px 0; }
